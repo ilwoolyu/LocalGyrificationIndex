@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+	<title>Gyrification Index</title>
+	<version>1.0</version>
+	<contributor>Ilwoo Lyu</contributor>
+	<description>Sulcal/Gyral Curve-based Gyrification Index</description>
+		<parameters>
+			<string>
+				<longflag>input</longflag>
+				<flag>i</flag>
+				<name>input</name>
+				<description>Input surface model (required)</description>
+			</string>
+			<string>
+				<longflag>gyrus</longflag>
+				<flag>g</flag>
+				<name>gcurve</name>
+				<description>Input gyral curve (required)</description>
+				<default></default>
+			</string>
+			<string>
+				<longflag>sulcus</longflag>
+				<flag>s</flag>
+				<name>scurve</name>
+				<description>Input sulcal curve (required)</description>
+				<default></default>
+			</string>
+			<string>
+				<longflag>output</longflag>
+				<flag>o</flag>
+				<name>output</name>
+				<description>Output gyrification index file name without extension (required)</description>
+				<default></default>
+			</string>
+			<string>
+				<longflag>geodesicMap</longflag>
+				<name>gmap</name>
+				<description>Output geodesic distance map</description>
+				<default></default>
+			</string>
+			<string>
+				<longflag>inputMap</longflag>
+				<name>map</name>
+				<description>Input velocity map</description>
+				<default></default>
+			</string>
+			<string>
+				<longflag>outer</longflag>
+				<name>outer</name>
+				<description>outer surface - cerebral hull</description>
+				<default></default>
+			</string>
+			<string>
+				<longflag>gpoint</longflag>
+				<name>gpoint</name>
+				<description>gyral point (optional)</description>
+				<default></default>
+			</string>
+			<string>
+				<longflag>spoint</longflag>
+				<name>spoint</name>
+				<description>sulcal point (optional)</description>
+				<default></default>
+			</string>
+			<string>
+				<longflag>corr</longflag>
+				<flag>c</flag>
+				<name>corr</name>
+				<description>correspondence between outer and input</description>
+				<default></default>
+			</string>
+			<boolean>
+				<longflag>kArea1</longflag>
+				<name>karea1</name>
+				<description>kernel area on the surface (optional)</description>
+				<default></default>
+			</boolean>
+			<boolean>
+				<longflag>kArea2</longflag>
+				<name>karea2</name>
+				<description>kernel area on the hull (optional)</description>
+				<default></default>
+			</boolean>
+			<double>
+				<longflag>radius</longflag>
+				<flag>r</flag>
+				<name>rad</name>
+				<description>Searching radius</description>
+				<default>30</default>
+			</double>
+			<double>
+				<longflag>maxArea</longflag>
+				<flag>m</flag>
+				<name>maxArea</name>
+				<description>Maximum propagation area</description>
+				<default>1200</default>
+			</double>
+			<double>
+				<longflag>intvArea</longflag>
+				<flag>t</flag>
+				<name>intvArea</name>
+				<description>Area interval</description>
+				<default>200</default>
+			</double>
+			<double>
+				<longflag>speed</longflag>
+				<name>speed</name>
+				<description>Mimimum speed at sulcal/gyral points</description>
+				<default>0.1</default>
+			</double>
+			<double>
+				<longflag>populationArea</longflag>
+				<name>populationArea</name>
+				<description>Expected population area</description>
+				<default>0</default>
+			</double>
+		</parameters>
+	<acknowledgements></acknowledgements>
+</executable>
