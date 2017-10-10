@@ -14,15 +14,14 @@ generateCLP(WRAPPER_XML wrapper/wrapper.xml)
 set(WRAPPER_MAIN wrapper/main.cpp)
 
 # MESH library
-set(MESH_LIB_DIR /NIRAL/work/ilwoolyu/MeshLib)
-include_directories(${MESH_LIB_DIR}/include)
-link_directories(${MESH_LIB_DIR}/lib)
+find_package(MeshLib REQUIRED)
+include_directories(${Mesh_INCLUDE_DIRS} ${Mesh_INCLUDE_DIRS}/Util)
+link_directories(${Mesh_LIBRARY_DIRS})
 
 # sources
 include_directories(src)
 set(SRC_FILES src/Gyrification.cpp)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ~/bin)
 
 add_executable(Gyrification ${SRC_FILES} ${WRAPPER_XML} ${WRAPPER_MAIN})
-#add_executable(Gyrification ${SRC_FILES} ${WRAPPER_MAIN})
 target_link_libraries(Gyrification Mesh)
