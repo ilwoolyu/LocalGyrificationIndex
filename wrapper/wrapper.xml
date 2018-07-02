@@ -3,7 +3,7 @@
 	<title>Gyrification Index</title>
 	<version>1.0</version>
 	<contributor>Ilwoo Lyu</contributor>
-	<description>Sulcal/Gyral Curve-based Gyrification Index</description>
+	<description>Cortical Shape-Adaptive Local Gyrification Index. Please refer to the following paper for details: Lyu et al., Novel Local Shape-Adaptive Gyrification Index with Application to Brain Development, MICCAI 2017</description>
 		<parameters>
 			<string>
 				<longflag>input</longflag>
@@ -47,19 +47,7 @@
 			<string>
 				<longflag>outer</longflag>
 				<name>outer</name>
-				<description>outer surface - cerebral hull</description>
-				<default></default>
-			</string>
-			<string>
-				<longflag>gpoint</longflag>
-				<name>gpoint</name>
-				<description>gyral point (optional)</description>
-				<default></default>
-			</string>
-			<string>
-				<longflag>spoint</longflag>
-				<name>spoint</name>
-				<description>sulcal point (optional)</description>
+				<description>outer surface - cerebral hull (required)</description>
 				<default></default>
 			</string>
 			<string>
@@ -92,21 +80,21 @@
 				<longflag>maxArea</longflag>
 				<flag>m</flag>
 				<name>maxArea</name>
-				<description>Maximum propagation area</description>
-				<default>1200</default>
+				<description>Maximum propagation area (rho)</description>
+				<default>316</default>
 			</double>
 			<double>
 				<longflag>intvArea</longflag>
 				<flag>t</flag>
 				<name>intvArea</name>
 				<description>Area interval</description>
-				<default>200</default>
+				<default>0</default>
 			</double>
 			<double>
 				<longflag>speed</longflag>
 				<name>speed</name>
-				<description>Mimimum speed at sulcal/gyral points</description>
-				<default>0.1</default>
+				<description>speed at sulcal/gyral points (eta)</description>
+				<default>0.2</default>
 			</double>
 			<double>
 				<longflag>populationArea</longflag>

@@ -16,17 +16,8 @@ int main(int argc, char *argv[])
 	const char *cfile = NULL;
 	if (!corr.empty()) cfile = corr.c_str();
 
-	if (gpoint.empty())
-		gi.open(input.c_str(), scurve.c_str(), gcurve.c_str(), outer.c_str(), cfile);
-	else
-	{
-		gi.open(input.c_str(), gpoint.c_str(), outer.c_str(), cfile);
-		if (!scurve.empty()) gi.loadScurve(scurve.c_str());
-		else if (!spoint.empty()) gi.loadSpoint(spoint.c_str());
-	}
-
+	gi.open(input.c_str(), scurve.c_str(), gcurve.c_str(), outer.c_str(), cfile);
 	gi.setPopulationArea(populationArea);
-	gi.setOutputFileName(output.c_str());
 	gi.setKernelInterval(intvArea);
 	gi.setMaxKernelSize(maxArea);
 	gi.setSpeed(speed);

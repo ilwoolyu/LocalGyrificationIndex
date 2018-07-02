@@ -20,11 +20,6 @@
 #include "Geodesic/Geodesic.h"
 #include "Geodesic/GeodesicA.h"
 
-//#define BOUNDARY
-#define ALL_GI
-//#define TEST_CASE
-//#define SG_ONLY
-
 using std::cout;
 using std::endl;
 
@@ -44,7 +39,6 @@ Gyrification::~Gyrification(void)
 	delete [] m_check_work;
 	delete [] m_u;
 	delete [] m_pu;
-	delete [] m_medial_point;
 }
 
 void Gyrification::run(double rad)
@@ -56,8 +50,6 @@ void Gyrification::run(double rad)
 	tstart = clock();
 	//setupSDist(rad);
 	setupGDist(rad);
-	//saveGMap("s1.lh.pial.smooth.map.txt");
-	//loadGMap("test/s1.lh.mid.smooth.map.txt");
 	elapse = (double)(clock() - tstart) / CLOCKS_PER_SEC;
 	cout << elapse << " sec elapsed" << endl;
 	
@@ -119,16 +111,12 @@ void Gyrification::initVertex(void)
 		m_vertex[i].id = i;
 		m_vertex[i].eid = -1;
 		m_vertex[i].adjDist = FLT_MAX;
-		m_vertex[i].intpSum = 0;
-		m_vertex[i].intpWeight = 0;
-		m_vertex[i].state = 0;
 	}
 
 	m_u = new double*[nv];
 	m_pu = new double[nv * 3];
 	m_lam1 = new double[nv];
 	m_lam2 = new double[nv];
-	m_medial_point = new double[nv];	// medial point
 	for (int i = 0; i < nv; i++) m_u[i] = &m_pu[i * 3];
 }
 
@@ -165,147 +153,6 @@ void Gyrification::open(const char *mesh, const char *sulcus, const char *gyrus,
 	
 	// read gyrus
 	loadGcurve(gyrus);
-}
-
-void Gyrification::open(const char *mesh, const char *gpoint, const char *outer, const char *corr)
-{
-	// read mesh
-	if (m_mesh != NULL) delete m_mesh;
-	m_mesh = new Mesh();
-	m_mesh->openFile(mesh);
-	
-	if (m_outer != NULL) delete m_outer;
-	m_outer = new Mesh();
-	m_outer->openFile(outer);
-	
-	m_check_work = NULL;
-	if (corr != NULL)
-	{
-		FILE *fp = fopen(corr, "r");
-		for (int i = 0; i < m_mesh->nVertex(); i++)
-		{
-			int id;
-			fscanf(fp, "%d", &id);
-			m_lookup.push_back(id);
-		}
-		fclose(fp);
-		m_check_work = new bool[m_outer->nVertex()];
-	}
-	
-	int nv = m_mesh->nVertex();
-	initVertex();	
-
-	double *cmin = new double[nv];
-	double *cmax = new double[nv];
-	double **umin = new double*[nv];
-	double **umax = new double*[nv];
-	double *work = new double[nv * 3 * 2];
-	for (int i = 0; i < nv; i++)
-	{
-		umin[i] = &work[i * 3];
-		umax[i] = &work[nv * 3 + i * 3];
-	}
-	SurfaceUtil::curvature(m_mesh, cmin, cmax, umin, umax);
-
-	int group = 0;
-	FILE *fp = fopen(gpoint, "r");
-	for (int i = 0; i < nv; i++)
-	{
-		int flag;
-		fscanf(fp, "%d", &flag);
-		if (flag == 0) continue;
-		int c = 0;
-		vector<point> curve;
-		{
-			memcpy(m_vertex[i].tan, umin[i], sizeof(double) * 3);
-			m_vertex[i].type = 2;
-			m_vertex[i].group = group;
-			m_vertex[i].eid = c++;
-			curve.push_back(m_vertex[i]);
-		}
-		if (!curve.empty())
-		{
-			m_gyrus.push_back(curve);
-			group++;
-		}
-	}
-	fclose(fp);
-
-	// free resource
-	delete [] cmin;
-	delete [] cmax;
-	delete [] umin;
-	delete [] umax;
-	delete [] work;
-}
-
-void Gyrification::open(const char *mesh, const char *outer, const char *corr)
-{
-	// read mesh
-	if (m_mesh != NULL) delete m_mesh;
-	m_mesh = new Mesh();
-	m_mesh->openFile(mesh);
-	
-	if (m_outer != NULL) delete m_outer;
-	m_outer = new Mesh();
-	m_outer->openFile(outer);
-	
-	m_check_work = NULL;
-	if (corr != NULL)
-	{
-		FILE *fp = fopen(corr, "r");
-		for (int i = 0; i < m_mesh->nVertex(); i++)
-		{
-			int id;
-			fscanf(fp, "%d", &id);
-			m_lookup.push_back(id);
-		}
-		fclose(fp);
-		m_check_work = new bool[m_outer->nVertex()];
-	}
-	
-	int nv = m_mesh->nVertex();
-	initVertex();	
-
-	double *cmin = new double[nv];
-	double *cmax = new double[nv];
-	double **umin = new double*[nv];
-	double **umax = new double*[nv];
-	double *work = new double[nv * 3 * 2];
-	for (int i = 0; i < nv; i++)
-	{
-		umin[i] = &work[i * 3];
-		umax[i] = &work[nv * 3 + i * 3];
-	}
-	SurfaceUtil::curvature(m_mesh, cmin, cmax, umin, umax);
-
-	// curvature-based gyrus
-	int group = 0;
-	int c = 0;
-	for (int i = 0; i < nv; i++)
-	{
-		if (cmax[i] < 0.05) continue;
-		vector<point> curve;
-		{
-			memcpy(m_vertex[i].tan, umin[i], sizeof(double) * 3);
-			m_vertex[i].type = 2;
-			m_vertex[i].group = group;
-			m_vertex[i].eid = c++;
-			curve.push_back(m_vertex[i]);
-		}
-		if (!curve.empty())
-		{
-			m_gyrus.push_back(curve);
-			group++;
-		}
-	}
-
-	// free resource
-	delete [] cmin;
-	delete [] cmax;
-	delete [] umin;
-	delete [] umax;
-	delete [] work;
 }
 
 void Gyrification::setKernelInterval(double intv)
@@ -360,8 +207,7 @@ void Gyrification::setupGDist(double distance)
 	// closest distances
 	vector<int> _start_point;
 	for (int i = 0; i < m_mesh->nVertex(); i++)
-	//	if (m_vertex[i].type == 2) _start_point.push_back(i);
-		if (m_vertex[i].type == 1 || m_vertex[i].type == 2) _start_point.push_back(i);	// use both sulcal and gyral points
+	if (m_vertex[i].type == 1 || m_vertex[i].type == 2) _start_point.push_back(i);	// use both sulcal and gyral points
 	sort(_start_point.begin(), _start_point.end());
 	_start_point.erase(unique(_start_point.begin(), _start_point.end()), _start_point.end());
 
@@ -375,97 +221,6 @@ void Gyrification::setupGDist(double distance)
 		m_vertex[i].adjDist = dist[i];
 		m_vertex[i].source = source[i];
 	}
-}
-
-void Gyrification::setupGDist2(double distance)
-{
-	// setup gd
-	GeodesicA gd(m_mesh);
-	const double *dist = gd.dist();
-	const int *state = gd.state();
-
-	// propagation from gyrus
-	for (int i = 0; i < m_gyrus.size(); i++)
-	{
-		if (i % 1000 == 0)
-			cout << "\r" << "Gyral Curve: " << (i + 1) << "/" << m_gyrus.size();
-		fflush(stdout);
-		for (int j = 0; j < m_gyrus[i].size(); j++)
-		{
-			int source = m_gyrus[i][j].id;
-			gd.perform_front_propagation(source, distance);
-			for (int k = 0; k < m_mesh->nVertex(); k++)
-			{
-				if (dist[k] < distance)
-				{
-					point::cpt cand_pt;
-					cand_pt.dist = dist[k];
-					cand_pt.id = m_gyrus[i][j].id;
-					cand_pt.type = m_gyrus[i][j].type;
-					cand_pt.group = m_gyrus[i][j].group;
-					cand_pt.eid = m_gyrus[i][j].eid;
-					m_vertex[k].cands.push_back(cand_pt);
-				}
-			}
-		}
-	}
-	
-	// closest distances
-	vector<int> _start_point;
-	for (int i = 0; i < m_mesh->nVertex(); i++)
-		if (m_vertex[i].type == 2) _start_point.push_back(i);
-	sort(_start_point.begin(), _start_point.end());
-	_start_point.erase(unique(_start_point.begin(), _start_point.end()), _start_point.end());
-
-	int *start_point = new int[_start_point.size()];
-	for (int i = 0; i < _start_point.size(); i++)
-		start_point[i] = _start_point[i];
-	gd.perform_front_propagation(start_point, _start_point.size(), NULL, 0);
-
-	// average distance
-	bool *checked = new bool[m_gyrus.size()];
-	for (int i = 0; i < m_mesh->nVertex(); i++)
-	{
-		int n = m_vertex[i].cands.size();
-		if (n == 0)
-		{
-			m_vertex[i].adjDist = dist[i];
-		}
-		else
-		{
-			memset(checked, 0, sizeof(bool) * m_gyrus.size());
-			std::sort(m_vertex[i].cands.begin(), m_vertex[i].cands.end());	// sort
-			//n = (n < 10) ? n: 10;	// neighborhoods
-			double assoc = 0;
-			double wsum = 0;
-			m_vertex[i].adjDist = 0;	// for weighted distance
-			for (int j = 0; j < n; j++)	// within a radius
-			{
-				//if (m_vertex[i].cands[j].dist - dist[i] > distance) break;
-				//if (!checked[m_vertex[i].cands[j].group])
-				{
-					double d = m_vertex[i].cands[j].dist;
-					double weight = Statistics::normal_pdf(d - dist[i], 0, 0.0224);	//gaussian 1mm = 0.0224
-
-					/*// closest point
-					if (m_vertex[i].adjDist > dist)
-						m_vertex[i].adjDist = dist;*/
-
-					// weighted sum
-					wsum += weight;
-					m_vertex[i].adjDist += d * weight;
-
-					checked[m_vertex[i].cands[j].group] = true;
-					assoc++;
-				}
-				//if (assoc == 3) break;
-			}
-			m_vertex[i].adjDist /= wsum;
-		}
-	}
-	delete [] checked;
-
-	cout << endl;
 }
 
 void Gyrification::setupTensorEqualArea(void)
@@ -642,39 +397,8 @@ void Gyrification::computeGyrification(void)
 
 	if (m_intv == 0) m_intv = m_maxArea * m_adjRatio;
 
-#ifdef ALL_GI
-	/*// find the closest endpoint for each vertex
-	gd.perform_front_propagation(end_point, _end_point.size(), NULL, 0);
-	double *rdist = new double[m_mesh->nVertex()];
-	memcpy(rdist, dist, sizeof(double) * m_mesh->nVertex());
-	//SurfaceUtil::smoothing(m_mesh, 3, rdist);
-	
-	for (int i = 0; i < m_mesh->nVertex(); i++)
-	{
-		if (i % 10000 == 0)
-		{
-			cout << "\rVertex " << i;
-			fflush(stdout);
-		}
-		gd.perform_front_propagation(&i, 1, NULL, 0, rdist[i]);
-		m_vertex[i].GI = kernelArea(&m_vertex[i], dist, state, area);
-	}*/
 	int n = (int)ceil(m_maxArea / m_intv);
 	time_t tstart = clock();
-
-#ifdef BOUNDARY
-	char fn[50][1024];
-	FILE *fp[50];
-	
-	for (int t = 0; t < n; t++)
-	{
-		double delta = m_intv * (t + 1);
-		if (delta > m_maxArea) delta = m_maxArea;
-		char fn[1024];
-		sprintf(fn, "%s.boundary.%d.txt", m_outfile, (int)delta);
-		fp[t] = fopen(fn, "wb");
-	}
-#endif
 
 	for (int i = 0; i < m_mesh->nVertex(); i++)
 	{
@@ -693,144 +417,14 @@ void Gyrification::computeGyrification(void)
 			double delta = m_intv * (t + 1) * m_adjRatio;
 			if (delta > m_maxArea * m_adjRatio) delta = m_maxArea * m_adjRatio;
 
-#ifndef BOUNDARY
 			m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist, state, area, delta));
-#else
-			saveKernelBoundary(fp[t], i, area, delta);
-#endif
 		}
 	}
-#ifdef BOUNDARY
-	for (int t = 0; t < n; t++)
-	{
-		fclose(fp[t]);
-	}
-#endif
 	cout << endl;
-#elif defined(SG_ONLY)
-	medialPoints();
-	int n = (int)ceil(m_maxArea / m_intv);
-	time_t tstart = clock();
-	vector<int> sg_point;
-	for (int i = 0; i < m_mesh->nVertex(); i++)
-	{
-		if (i % 1000 == 0)
-		{
-			double elapse = (double)(clock() - tstart) / CLOCKS_PER_SEC;
-			cout << "Vertex " << i << ": ";
-			cout << elapse << " sec elapsed\r";
-			fflush(stdout);
-			//tstart = clock();
-		}
-//		if (m_vertex[i].type == 1 && m_medial_point[i] < 0.5)
-		if (m_vertex[i].type == 1)
-			gd.perform_front_propagation(&i, 1, end_gyral_point, _end_gyral_point.size());
-//		else if (m_vertex[i].type == 2)  gd.perform_front_propagation(&i, 1, end_sulcal_point, _end_sulcal_point.size());
-		//gd.perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea);
-		//m_vertex[i].GI = kernelArea(&m_vertex[i], dist, state);
-//		if (m_vertex[i].type == 1 && m_medial_point[i] < 0.5)
-		if (m_vertex[i].type == 1)
-			m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist, state));
-//		else if (m_vertex[i].type == 2) m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist, state));
-		else
-		{
-			m_vertex[i].GI.push_back(0.0f);
-			m_vertex[i].kArea1.push_back(0.0f);
-			m_vertex[i].kArea2.push_back(0.0f);
-		}
-	}
-#else
-	// sulcal points
-	vector<int> sulcal_point;
-	for (int i = 0; i < m_mesh->nVertex(); i++)
-		if (m_vertex[i].type == 1) sulcal_point.push_back(i);
-	sort(sulcal_point.begin(), sulcal_point.end());
-	sulcal_point.erase(unique(sulcal_point.begin(), sulcal_point.end()), sulcal_point.end());
-	/*for (int i = 0; i < m_mesh->nVertex(); i++)
-	{
-		int nn = m_mesh->vertex(i)->nNeighbor();
-		bool localmax = true;
-		for (int j = 0; j < nn; j++)
-		{
-			int id = m_mesh->vertex(i)->list(j);
-			localmax = m_vertex[i].adjDist > m_vertex[id].adjDist;
-			if (!localmax) break;
-		}
-		if (localmax) sulcal_point.push_back(i);
-	}*/
-	
-	// kernel
-	for (int i = 0; i < sulcal_point.size(); i++)
-	{
-		// GI for a given point
-		int id = sulcal_point[i];
-		if (i % 100 == 0)
-		{
-			cout << "\rVertex " << i << "/" << sulcal_point.size();
-			fflush(stdout);
-		}
-		//gd.perform_front_propagation(&id, 1, end_point, _end_point.size());
-		//gd.perform_front_propagation(id, 0.150);
-		gd.perform_front_propagation(id, 0.224);
-		//m_vertex[id].GI = kernelArea(&m_vertex[id], dist, state);
-		m_vertex[id].GI.push_back(kernelArea(&m_vertex[id], dist, state));
-		
-		// recompute 3-sigma kernel
-		/*double dmax = 0;
-		for (int j = 0; j < m_mesh->nVertex(); j++)
-			if (state[j] == GW_GeodesicVertex::kDead && dmax < dist[j])
-				dmax = dist[j];
-		gd.perform_front_propagation(&id, 1, NULL, 0, dmax * 3);*/
-		double dmax = 0.1;
-		gd.perform_front_propagation(&id, 1, NULL, 0, dmax*3);
 
-		for (int j = 0; j < m_mesh->nVertex(); j++)
-		{
-			// for a selected vertex 
-			//if (dist[j] < 1e6)
-			if (state[j] == GW_GeodesicVertex::kDead)
-			{
-				//double w = Statistics::normal_pdf(dist[j], 0, m_vertex[id].adjDist / 3);
-				double w = Statistics::normal_pdf(dist[j], 0, dmax);
-				//double w=1;
-				m_vertex[j].intpWeight += w;
-				m_vertex[j].intpSum += w * m_vertex[id].GI;
-				m_vertex[j].state = state[j];
-				prop p;
-				p.weight = w;
-				p.value = m_vertex[id].GI;
-				m_vertex[j].distrib.push_back(p);
-			}
-		}
-	}
 	
-	for (int j = 0; j < m_mesh->nVertex(); j++)
-	{
-		if (m_vertex[j].intpWeight > 0)
-		{
-			// median
-			/*sort(m_vertex[j].distrib.begin(), m_vertex[j].distrib.end());
-			double w = 0;
-			for (int k = 0; k < m_vertex[j].distrib.size() && w * 2 <= m_vertex[j].intpWeight; k++)
-			{
-				w += m_vertex[j].distrib[k].weight;
-				m_vertex[j].GI = m_vertex[j].distrib[k].value;
-				//cout << m_vertex[j].GI << " ";
-			}
-			//cout << endl;*/
-			
-			// mean
-			m_vertex[j].GI = m_vertex[j].intpSum / m_vertex[j].intpWeight;
-		}
-		else
-		{
-			m_vertex[j].GI = 0;
-		}
-	}
-#endif
 	delete [] end_gyral_point;
 	delete [] end_sulcal_point;
-	//delete [] w;
 }
 
 void Gyrification::smoothingScalar(double *scalar, int n)
@@ -950,7 +544,7 @@ void Gyrification::precomputeArea(void)
 		}
 		m_areamap2.push_back(area);
 	}
-	cout << "Total " << ndefects << " found from the outer surface" << endl;
+	cout << "Total " << ndefects << "small area (1e-4) found from the outer surface" << endl;
 }
 
 double Gyrification::kernelArea(point *p, const double *dist, const int *state, const double *area, const double size)
@@ -962,7 +556,6 @@ double Gyrification::kernelArea(point *p, const double *dist, const int *state, 
 	for (int i = 0; i < m_mesh->nVertex(); i++)
 		if (maxdist < dist[i] && dist[i] < 1e6) maxdist = dist[i];
 
-//	maxdist *= 0.95;
 	if (m_check_work != NULL)
 	{	
 		for (int i = 0; i < m_mesh->nVertex(); i++)
@@ -1031,10 +624,6 @@ double Gyrification::vertexArea(const Mesh *mesh, int id)
 
 void Gyrification::saveGI(const char *filename)
 {
-#ifdef BOUNDARY
-	return;
-#endif
-
 	int n = (int)ceil(m_maxArea / m_intv);
 	for (int t = 0; t < n; t++)
 	{
@@ -1046,19 +635,6 @@ void Gyrification::saveGI(const char *filename)
 		for (int i = 0; i < m_mesh->nVertex(); i++)
 		{
 			fprintf(fp, "%f\n", m_vertex[i].GI[t]);
-			/*// kernel overlaps
-			if (m_vertex[i].type == 2)
-				fprintf(fp, "%d\n", 4);
-			else
-			{
-				if (m_vertex[i].state != 0)
-				{
-					if (m_vertex[i].type == 1) fprintf(fp, "%d\n", 0);
-					else if (m_vertex[i].state == 1) fprintf(fp, "%d\n", 2);	// kernel boundary
-					else fprintf(fp, "%d\n", 1);	// inside kernel
-				}
-				else fprintf(fp, "%d\n", 3);
-			}*/
 		}
 		fclose(fp);
 	}
@@ -1161,7 +737,7 @@ void Gyrification::loadScurve(const char *filename)
 {
 	// setup stream
 	using std::ifstream;
-	char buf[8192];
+	char buf[65536];
 	ifstream fin;
 	
 	int group;
@@ -1198,7 +774,7 @@ void Gyrification::loadGcurve(const char *filename)
 {
 	// setup stream
 	using std::ifstream;
-	char buf[8192];
+	char buf[65536];
 	ifstream fin;
 	
 	int group;
@@ -1232,59 +808,6 @@ void Gyrification::loadGcurve(const char *filename)
 		}
 	}
 	fin.close();
-}
-
-void Gyrification::medialPoints(void)
-{
-	Geodesic gd(m_mesh);
-	const double *dist = gd.dist();
-	const int *state = gd.state();
-	const int *source = gd.source();
-
-	int n = m_mesh->nVertex();
-
-	// closest distances
-	vector<int> _start_point;
-	for (int i = 0; i < n; i++)
-		if (m_vertex[i].type == 2) _start_point.push_back(i);	// push only gyral points
-	sort(_start_point.begin(), _start_point.end());
-	_start_point.erase(unique(_start_point.begin(), _start_point.end()), _start_point.end());
-
-	int *start_point = new int[_start_point.size()];
-	for (int i = 0; i < _start_point.size(); i++)
-		start_point[i] = _start_point[i];
-	gd.perform_front_propagation(start_point, _start_point.size(), NULL, 0);
-	
-	for (int i = 0; i < n; i++)
-	{
-		m_medial_point[i] = -1;
-		
-		// sulcal points
-		if (m_vertex[i].type == 1)
-		{
-			double maxNeighbor = dist[i];
-			int id = i;
-			do
-			{
-				int maxid = -1;
-				int nn = m_mesh->vertex(id)->nNeighbor();
-				for (int j = 0; j < nn; j++)
-				{
-					int id2 = m_mesh->vertex(id)->list(j);
-					if (source[id] != source[id2]) continue;
-					if (maxNeighbor < dist[id2])
-					{
-						maxNeighbor = dist[id2];
-						maxid = id2;
-					}
-				}
-				id = maxid;
-			} while (id != -1);
-			m_medial_point[i] = maxNeighbor - dist[i];
-		}
-	}
-	
-	delete [] start_point;
 }
 
 void Gyrification::saveKernelBoundary(const char *filename)
@@ -1336,11 +859,6 @@ void Gyrification::getKernelBoundary(int index, const double *area, double maxAr
 		}
 		if (boundary) m_vertex[index].boundary.push_back(i);
 	}
-}
-
-void Gyrification::setOutputFileName(const char *filename)
-{
-	strcpy(m_outfile, filename);
 }
 
 double Gyrification::totalArea(void)
