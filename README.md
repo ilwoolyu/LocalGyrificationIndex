@@ -3,14 +3,13 @@
 ## Introduction
 The amount of cortical folding, or gyrification, is typically measured within local cortical regions covered by an equidistant geodesic or nearest neighborhood-ring kernel. However, without careful design, such a kernel can easily cover multiple sulcal and gyral regions that may not be functionally related. Furthermore, this can result in smoothing out details of cortical folding, which consequently blurs local gyrification measurements. Here, we propose a novel kernel shape to locally quantify cortical gyrification within sulcal and gyral regions.
 ### Input
-* surface file (.vtk or FreeSurfer outputs - ?h.pial and/or ?.white): triangular 3D mesh
+* surface file (.vtk or FreeSurfer outputs - ?h.pial and/or ?h.white): triangular 3D mesh
 * sulcal and gyral curves (.scurve and .gcurve): outputs of <a href="https://github.com/ilwoolyu/CurveExtraction">curve extraction</a> [3]
 * outer hull file (.vtk): output of <a href="https://github.com/ilwoolyu/klaplace">klaplace</a> [4]
 ### Output
 * lgi file (.txt): local gyrification index per vertex
 ### Usage
 #### Sulcal/gyral curve extraction
-Sulcal and gyral curves categorize cortical regions. <br />
 Our tools do not provide native FreeSurfer surfaces yet. To use FreeSurfer surfaces, we convert input using the following FreeSurfer command:
 ```
 mris_convert input input.vtk
@@ -58,7 +57,7 @@ klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 #### Local gyrification index
 The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt"
 ```
-Gyrification -i input.vtk -o output --outer outer_hull_corr.vtk -s output.scurve -g output.gcurve -m 316.6 --speed 0.2
+Gyrification -i input.vtk -o output --outer outer_hull_corr.vtk -s output.scurve -g output.gcurve -m 316 --speed 0.2
 ```
 More technical details (theory, parameter choice, etc.) can be found in [1,2].<br />
 * Note 1: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area.
