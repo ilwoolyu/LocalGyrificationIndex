@@ -3,7 +3,7 @@
 ## Introduction
 The amount of cortical folding, or gyrification, is typically measured within local cortical regions covered by an equidistant geodesic or nearest neighborhood-ring kernel. However, without careful design, such a kernel can easily cover multiple sulcal and gyral regions that may not be functionally related. Furthermore, this can result in smoothing out details of cortical folding, which consequently blurs local gyrification measurements. Here, we propose a novel kernel shape to locally quantify cortical gyrification within sulcal and gyral regions.
 ### Input
-* surface file (.vtk): triangular 3D mesh
+* surface file (.vtk or FreeSurfer outputs - ?h.pial and/or ?.white): triangular 3D mesh
 * sulcal and gyral curves (.scurve and .gcurve): outputs of <a href="https://github.com/ilwoolyu/CurveExtraction">curve extraction</a> [3]
 * outer hull file (.vtk): output of <a href="https://github.com/ilwoolyu/klaplace">klaplace</a> [4]
 ### Output
@@ -11,6 +11,10 @@ The amount of cortical folding, or gyrification, is typically measured within lo
 ### Usage
 #### Sulcal/gyral curve extraction
 Sulcal and gyral curves categorize cortical regions. <br />
+Our tools do not provide native FreeSurfer surfaces yet. To use FreeSurfer surfaces, we convert input using the following FreeSurfer command:
+```
+mris_convert input input.vtk
+```
 The following command line will generate "output.scurve" and "output.gcurve":<br />
 ```
 CurveExtraction -i input.vtk -o output --sulcus --gyrus --novtk
@@ -23,9 +27,9 @@ CurveExtraction -i white.vtk -o output --gyrus --novtk
 #### Outer hull creation
 To create outer hull, an initial outer hull surface needs to be generated. The cortical surface is voxelized and the morphological operation is applied on it. For this purpose, the FreeSurfer command lines can be used.<br />
 
-To create a binary volume image of the input surface:<br />
+To create a binary volume image of the input (FreeSurfer) surface:<br />
 ```
-mris_fill -c -r 1 input.vtk input_filled_vol.mgz
+mris_fill -c -r 1 input input_filled_vol.mgz
 ```
 From the volume (input_filled_vol.mgz), the outer hull can be obtained using <a href="https://www.mathworks.com/help/matlab/ref/isosurface.html">isosurface</a> implemented in MATLAB. This is implemented in FreeSurfer:<br />
 ```
@@ -73,6 +77,6 @@ More technical details (theory, parameter choice, etc.) can be found in [1,2].<b
 <ol>
 <li>Lyu, I., Kim, S., Girault, J., Gilmore, J., Styner, M., <a href="https://doi.org/10.1016/j.media.2018.06.009">A Cortical Shape-Adaptive Approach to Local Gyrification Index</a>, <i>Medical Image Analysis</i>, In press
 <li>Lyu, I., Kim, S., Bullins, J., Gilmore, J., Styner, M., <a href="http://dx.doi.org/10.1007/978-3-319-66182-7_4">Novel Local Shape-Adaptive Gyrification Index with Application to Brain Development</a>, <i>Medical Image Computing and Computer Assisted Intervention (MICCAI) 2017</i>, LNCS10433, 31-39, 2017
-<li>Lyu, I., Kim, S., Woodward, N., Styner, M., Landman, B., <a href="http://dx.doi.org/10.1109/TMI.2017.2787589">TRACE: A Topological Graph Representation for Automatic Sulcal Curve Extraction</a>, IEEE Transactions on Medical Imaging, 37(7), 1653-1663, 2018.</li>
-<li>Lee, J., Kim, S., Oguz, I., Styner, M., <a href="http://dx.doi.org/10.1117/12.2216420">Enhanced Cortical Thickness Measurements for Rodent Brains via Lagrangian-based RK4 Streamline Computation</a>, 2016, SPIE9784, 97840B-1-97840B-10.
+<li>Lyu, I., Kim, S., Woodward, N., Styner, M., Landman, B., <a href="http://dx.doi.org/10.1109/TMI.2017.2787589">TRACE: A Topological Graph Representation for Automatic Sulcal Curve Extraction</a>, <i>IEEE Transactions on Medical Imaging</i>, 37(7), 1653-1663, 2018</li>
+<li>Lee, J., Kim, S., Oguz, I., Styner, M., <a href="http://dx.doi.org/10.1117/12.2216420">Enhanced Cortical Thickness Measurements for Rodent Brains via Lagrangian-based RK4 Streamline Computation</a>, <i>SPIE Medical Imaging 2016</i>, SPIE9784, 97840B-1-97840B-10, 2016</li>
 </ol>
