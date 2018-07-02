@@ -4,13 +4,13 @@
 The amount of cortical folding, or gyrification, is typically measured within local cortical regions covered by an equidistant geodesic or nearest neighborhood-ring kernel. However, without careful design, such a kernel can easily cover multiple sulcal and gyral regions that may not be functionally related. Furthermore, this can result in smoothing out details of cortical folding, which consequently blurs local gyrification measurements. Here, we propose a novel kernel shape to locally quantify cortical gyrification within sulcal and gyral regions.
 ### Input
 * surface file (.vtk or FreeSurfer outputs - ?h.pial and/or ?h.white): triangular 3D mesh
-* sulcal and gyral curves (.scurve and .gcurve): outputs of <a href="https://github.com/ilwoolyu/CurveExtraction">curve extraction</a> [3]
+* sulcal and gyral curves (.scurve and .gcurve): outputs of <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction</a> [3]
 * outer hull file (.vtk): output of <a href="https://github.com/ilwoolyu/klaplace">klaplace</a> [4]
 ### Output
 * lgi file (.txt): local gyrification index per vertex
 ### Usage
 #### Sulcal/gyral curve extraction
-Our tools do not provide native FreeSurfer surfaces yet. To use FreeSurfer surfaces, we convert input using the following FreeSurfer command:
+Our tools do not provide native FreeSurfer surfaces yet. To use FreeSurfer surfaces, we convert "input" using the following FreeSurfer command:
 ```
 mris_convert input input.vtk
 ```
@@ -55,19 +55,19 @@ klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 * Note 1: It would be useful if do some smoothing on "outer_hull_corr.vtk" since it's very rough mesh since isosurface does not provide smooth mesh.
 * Note 2: Since the outputs of klaplace consume a huge disk space, it is recommended to delete all but "outer_hull_corr.vtk".<br />
 #### Local gyrification index
-The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt"
+The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt":
 ```
 Gyrification -i input.vtk -o output --outer outer_hull_corr.vtk -s output.scurve -g output.gcurve -m 316 --speed 0.2
 ```
 More technical details (theory, parameter choice, etc.) can be found in [1,2].<br />
 * Note 1: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area.
-* Note 2: -t [area] will create different lgi measurements in a given interval; e.g., for -t 100 -m 300, it will give lgi at 100, 200, and 300.
+* Note 2: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
 ## Dependency
 * <a href="https://github.com/ilwoolyu/MeshLib">MeshLib (general mesh processing)</a><br />
 * <a href="https://github.com/ilwoolyu/SlicerExecutionModel">SlicerExecutionModel (CLI)</a>
 
 ## Required Components
-* <a href="https://github.com/ilwoolyu/SlicerExecutionModel">curve extraction (sulcal/gyral curves)</a>
+* <a href="https://github.com/ilwoolyu/SlicerExecutionModel">CurveExtraction (sulcal/gyral curves)</a>
 * <a href="https://github.com/ilwoolyu/klaplace">klaplace (outer hull correspondence)</a>
 * <a href="https://surfer.nmr.mgh.harvard.edu/">FreeSurfer (voxelization of the surfaces)</a>
 * <a href="https://www.mathworks.com/products/matlab.html">MATLAB (initial outer hull creation)</a>
