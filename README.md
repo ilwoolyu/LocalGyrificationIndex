@@ -67,7 +67,7 @@ More technical details (theory, parameter choice, etc.) can be found in [1,2].<b
 * <a href="https://github.com/ilwoolyu/SlicerExecutionModel">SlicerExecutionModel (CLI)</a>
 
 ## Required Components
-* <a href="https://github.com/ilwoolyu/SlicerExecutionModel">CurveExtraction (sulcal/gyral curves)</a>
+* <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction (sulcal/gyral curves)</a>
 * <a href="https://github.com/ilwoolyu/klaplace">klaplace (outer hull correspondence)</a>
 * <a href="https://surfer.nmr.mgh.harvard.edu/">FreeSurfer (voxelization of the surfaces)</a>
 * <a href="https://www.mathworks.com/products/matlab.html">MATLAB (initial outer hull creation)</a>
