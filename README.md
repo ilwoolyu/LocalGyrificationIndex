@@ -45,10 +45,10 @@ mris_convert outer_hull outer_hull.vtk
 #### Outer hull correspondence
 To find a Laplacian shape correspondence, the following command will give Laplacian trajectories:<br />
 ```
-klaplace -dims 128 input.vtk outer_hull.vtk -surfaceCorrespondence output
+klaplace -dims 128 input.vtk outer_hull.vtk -surfaceCorrespondence outer_hull
 ```
 The trjectories will be generated in "outer_hull_warpedMesh.vtp".
-Let's trace the final destinations of the trajectories to obtain the outer hull<br />
+Let's trace the final destinations of the trajectories to obtain the outer hull:<br />
 ```
 klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 ```
@@ -74,7 +74,7 @@ More technical details (theory, parameter choice, etc.) can be found in [1,2].<b
 
 ## References
 <ol>
-<li>Lyu, I., Kim, S., Girault, J., Gilmore, J., Styner, M., <a href="https://doi.org/10.1016/j.media.2018.06.009">A Cortical Shape-Adaptive Approach to Local Gyrification Index</a>, <i>Medical Image Analysis</i>, In press
+<li>Lyu, I., Kim, S., Girault, J., Gilmore, J., Styner, M., <a href="https://doi.org/10.1016/j.media.2018.06.009">A Cortical Shape-Adaptive Approach to Local Gyrification Index</a>, <i>Medical Image Analysis</i>, 48, 244-258, 2018
 <li>Lyu, I., Kim, S., Bullins, J., Gilmore, J., Styner, M., <a href="http://dx.doi.org/10.1007/978-3-319-66182-7_4">Novel Local Shape-Adaptive Gyrification Index with Application to Brain Development</a>, <i>Medical Image Computing and Computer Assisted Intervention (MICCAI) 2017</i>, LNCS10433, 31-39, 2017
 <li>Lyu, I., Kim, S., Woodward, N., Styner, M., Landman, B., <a href="http://dx.doi.org/10.1109/TMI.2017.2787589">TRACE: A Topological Graph Representation for Automatic Sulcal Curve Extraction</a>, <i>IEEE Transactions on Medical Imaging</i>, 37(7), 1653-1663, 2018</li>
 <li>Lee, J., Kim, S., Oguz, I., Styner, M., <a href="http://dx.doi.org/10.1117/12.2216420">Enhanced Cortical Thickness Measurements for Rodent Brains via Lagrangian-based RK4 Streamline Computation</a>, <i>SPIE Medical Imaging 2016</i>, SPIE9784, 97840B-1-97840B-10, 2016</li>
