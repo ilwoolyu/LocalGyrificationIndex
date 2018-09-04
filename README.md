@@ -64,7 +64,7 @@ More technical details (theory, parameter choice, etc.) can be found in [1,2].<b
 * Note 2: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
 ## Dependency
 * <a href="https://github.com/ilwoolyu/MeshLib">MeshLib (general mesh processing)</a><br />
-* <a href="https://github.com/ilwoolyu/SlicerExecutionModel">SlicerExecutionModel (CLI)</a>
+* <a href="https://github.com/Slicer/SlicerExecutionModel">SlicerExecutionModel (CLI)</a>
 
 ## Required Components
 * <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction (sulcal/gyral curves)</a>
