@@ -20,8 +20,8 @@ CurveExtraction -i input.vtk -o output --sulcus --gyrus --noVtk
 ```
 Or if both pial and white surfaces are available, the following commands give better extraction results:<br />
 ```
-CurveExtraction -i pial.vtk -o output --sulcus --noVtk
-CurveExtraction -i white.vtk -o output --gyrus --noVtk
+CurveExtraction -i pial.vtk -o output --sulcus --bary --noVtk
+CurveExtraction -i white.vtk -o output --gyrus --bary --noVtk
 ```
 #### Outer hull creation
 To create outer hull, an initial outer hull surface needs to be generated. The cortical surface is voxelized and the morphological operation is applied on it.<br />
@@ -33,7 +33,7 @@ voxelizer('input.vtk', 'outer_hull.vtk');
 #### Outer hull correspondence
 To find a Laplacian shape correspondence, the following command will give Laplacian trajectories:<br />
 ```
-klaplace -dims 128 input.vtk outer_hull.vtk -surfaceCorrespondence outer_hull
+klaplace -dims 256 input.vtk outer_hull.vtk -surfaceCorrespondence outer_hull
 ```
 The trjectories will be generated in "outer_hull_warpedMesh.vtp".
 Let's trace the final destinations of the trajectories to obtain the outer hull:<br />
@@ -45,8 +45,9 @@ klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 #### Local gyrification index
 The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt":
 ```
-Gyrification -i input.vtk -o output --outer outer_hull_corr.vtk -s output.scurve -g output.gcurve -m 316 --speed 0.2
+Gyrification -i input.vtk -o output --outer outer_hull_corr.vtk -s output.scurve.bary -g output.gcurve.bary -m 316 --speed 0.2
 ```
+Note barycentric curves can provide dense points along sulcal/gyral regions.
 More technical details (theory, parameter choice, etc.) can be found in [1,2].<br />
 * Note 1: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area.
 * Note 2: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.

@@ -105,7 +105,7 @@ endif
 # Gyrification
 #
 # compute a local gyrification index map
-set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve -g $gcurve -m $kernel --speed $anisotropy)
+set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy)
 echo "================="
 echo "$cmd"
 echo "================="
