@@ -10,37 +10,25 @@ The amount of cortical folding, or gyrification, is typically measured within lo
 * lgi file (.txt): local gyrification index per vertex
 ### Usage
 #### Sulcal/gyral curve extraction
-Our tools do not provide native FreeSurfer surfaces yet. To use FreeSurfer surfaces, we convert "input" using the following FreeSurfer command:
+Our tools do not provide native FreeSurfer surfaces yet. To use FreeSurfer surfaces, we may convert "input" using the following FreeSurfer command:
 ```
 mris_convert input input.vtk
 ```
 The following command line will generate "output.scurve" and "output.gcurve":<br />
 ```
-CurveExtraction -i input.vtk -o output --sulcus --gyrus --novtk
+CurveExtraction -i input.vtk -o output --sulcus --gyrus --noVtk
 ```
 Or if both pial and white surfaces are available, the following commands give better extraction results:<br />
 ```
-CurveExtraction -i pial.vtk -o output --sulcus --novtk
-CurveExtraction -i white.vtk -o output --gyrus --novtk
+CurveExtraction -i pial.vtk -o output --sulcus --noVtk
+CurveExtraction -i white.vtk -o output --gyrus --noVtk
 ```
 #### Outer hull creation
-To create outer hull, an initial outer hull surface needs to be generated. The cortical surface is voxelized and the morphological operation is applied on it. For this purpose, the FreeSurfer command lines can be used.<br />
+To create outer hull, an initial outer hull surface needs to be generated. The cortical surface is voxelized and the morphological operation is applied on it.<br />
 
-To create a binary volume image of the input (FreeSurfer) surface:<br />
+To create a binary volume image of the input surface using <a href="https://www.mathworks.com/matlabcentral/fileexchange/27390-mesh-voxelisation">Mesh voxelisation</a>. From the volume (input_filled_vol.mgz), the outer hull can be obtained using <a href="https://www.mathworks.com/help/matlab/ref/isosurface.html">isosurface</a>. Both are implemented in MATLAB.<br />
 ```
-mris_fill -c -r 1 input input_filled_vol.mgz
-```
-From the volume (input_filled_vol.mgz), the outer hull can be obtained using <a href="https://www.mathworks.com/help/matlab/ref/isosurface.html">isosurface</a> implemented in MATLAB. This is implemented in FreeSurfer:<br />
-```
-make_outer_surface('input_filled_vol.mgz', 15, 'outer_hull');
-```
-To extract only a main mesh component, use the following FreeSurfer command line:<br />
-```
-mris_extract_main_component outer_hull outer_hull
-```
-Finally, convert "outer_hull" into "outer_hull.vtk":<br />
-```
-mris_convert outer_hull outer_hull.vtk
+voxelizer('input.vtk', 'outer_hull.vtk');
 ```
 #### Outer hull correspondence
 To find a Laplacian shape correspondence, the following command will give Laplacian trajectories:<br />
@@ -69,7 +57,6 @@ More technical details (theory, parameter choice, etc.) can be found in [1,2].<b
 ## Required Components
 * <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction (sulcal/gyral curves)</a>
 * <a href="https://github.com/ilwoolyu/klaplace">klaplace (outer hull correspondence)</a>
-* <a href="https://surfer.nmr.mgh.harvard.edu/">FreeSurfer (voxelization of the surfaces)</a>
 * <a href="https://www.mathworks.com/products/matlab.html">MATLAB (initial outer hull creation)</a>
 
 ## References

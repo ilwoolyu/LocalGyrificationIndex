@@ -68,7 +68,9 @@ public:
 	void saveKernelBoundary(FILE *fp, int index, const double *area, double maxArea);
 	void loadSpoint(const char *filename);
 	void loadScurve(const char *filename);
+	void loadScurveBary(const char *filename);
 	void loadGcurve(const char *filename);
+	void loadGcurveBary(const char *filename);
 	void setPopulationArea(double populationArea);
 private:
 	void initVertex(void);

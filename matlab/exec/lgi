@@ -1,0 +1,290 @@
+#!/bin/tcsh -f
+
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape Adaptive Local Gyrification Index v1.0 $'
+set PrintHelp = 0;
+set RunIt = 1;
+set cmdargs = ($argv);
+set anisotropy = 0.2
+set kernel = 316
+set runtime_path = $0:h
+#set echo=1
+set start=`date`
+
+if ($#argv == 0) then
+	goto usage_exit;
+endif
+goto parse_args;
+parse_args_return:
+
+goto check_params;
+check_params_return:
+
+# begin...
+#---------
+
+# temporary work files go here...
+set tmpdir = ($PWD/tmp-lgi-${input:t:r:t})
+set cmd=(rm -Rf $tmpdir)
+echo "================="
+echo "$cmd"
+echo "================="
+if ($RunIt) $cmd
+set cmd=(mkdir -p $tmpdir)
+echo "================="
+echo "$cmd"
+echo "================="
+if ($RunIt) $cmd
+
+#
+# hull
+#
+# create a cerebral hull that tightly envelop the surface
+set cmd=($runtime_path/hull ${input} ${tmpdir}/${input:r:t}.hull.vtk)
+echo "================="
+echo "$cmd"
+echo "================="
+if ($RunIt) $cmd
+if($status) then
+  echo "ERROR: $cmd failed!"
+  exit 1;
+endif
+
+#
+# klaplace
+#
+# establish a Laplacian correspondence between the hull and surface
+set outer = ${tmpdir}/${input:r:t}.hull.corr.vtk
+set cmd1=($runtime_path/klaplace -dims 256 ${input} ${tmpdir}/${input:r:t}.hull.vtk -surfaceCorrespondence ${tmpdir}/${input:r:t}.corr)
+set cmd2=($runtime_path/klaplace -conv ${tmpdir}/${input:r:t}.corr_warpedMesh.vtp $outer)
+set cmd3=(rm -Rf "$tmpdir/*.vtp" "$tmpdir/*.vts")
+echo "================="
+echo "$cmd1"
+echo "$cmd2"
+echo "$cmd3"
+echo "================="
+if ($RunIt) then
+  $cmd1
+  if($status) then
+    echo "ERROR: $cmd1 failed!"
+    exit 1;
+  endif
+  $cmd2
+  if($status) then
+    echo "ERROR: $cmd2 failed!"
+    exit 1;
+  endif
+  $cmd3
+endif
+
+#
+# CurveExtraction
+#
+# extracts sulcal and gyral curves from pial and white surfaces
+set scurve = ${tmpdir}/${input:r:t}.scurve
+set gcurve = ${tmpdir}/${white:r:t}.gcurve
+set cmd1=($runtime_path/CurveExtraction -i ${input} -o ${tmpdir}/${input:r:t} --sulcus --noVtk --bary)
+set cmd2=($runtime_path/CurveExtraction -i ${white} -o ${tmpdir}/${white:r:t} --gyrus --noVtk --bary)
+echo "================="
+echo "$cmd1"
+echo "$cmd2"
+echo "================="
+if ($RunIt) then
+  $cmd1
+  if($status) then
+    echo "ERROR: $cmd1 failed!"
+    exit 1;
+  endif
+  $cmd2
+  if($status) then
+    echo "ERROR: $cmd2 failed!"
+    exit 1;
+  endif
+endif
+
+#
+# Gyrification
+#
+# compute a local gyrification index map
+set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve -g $gcurve -m $kernel --speed $anisotropy)
+echo "================="
+echo "$cmd"
+echo "================="
+if ($RunIt) $cmd
+if($status) then
+  echo "ERROR: $cmd failed!"
+  exit 1;
+endif
+set cmd=(mv "${tmpdir}/${input:r:t}.lgi.map.*.txt" "$PWD")
+echo "================="
+echo "$cmd"
+echo "================="
+if ($RunIt) $cmd
+
+#--------
+# end...
+set cmd=(rm -Rf $tmpdir)
+echo "================="
+echo "$cmd"
+echo "================="
+if ($RunIt) $cmd
+set end=`date`
+echo "done."
+echo "Start: $start"
+echo "End:   $end"
+exit 0
+
+#----------------------------------------------------------#
+############--------------##################
+parse_args:
+set cmdline = ($argv);
+
+while( $#argv != 0 )
+
+  set flag = $argv[1]; shift;
+
+  switch($flag)
+
+   case "--anisotropy":
+      set anisotropy = $argv[1]; shift;
+      echo "Using anisotropy of ${anisotropy} for cortical folding adaptive propagation."
+      breaksw
+
+   case "--kernel":
+      set kernel = $argv[1]; shift;
+      echo "Using kernel size of ${kernel} mm^2 to cover local regions."
+      breaksw
+
+   case "-h":
+   case "--help":
+      set PrintHelp = 1;
+      goto usage_exit;
+      exit 0;
+      breaksw
+
+   case "--version":
+      echo $VERSION
+      exit 0;
+      breaksw
+
+   case "-i":
+   case "--i":
+   case "--input":
+      if ( $#argv == 0) goto arg1err;
+      set input = $argv[1]; shift;
+      #echo ${input}
+      breaksw
+
+   case "--white":
+      set white = $argv[1]; shift;
+      breaksw
+
+   case "--debug":
+   case "--echo":
+      set echo = 1;
+      set verbose = 1
+      breaksw
+
+   case "--dontrun":
+      set RunIt = 0;
+      breaksw
+
+   default:
+      breaksw
+
+  endsw
+
+end
+goto parse_args_return;
+############--------------##################
+
+
+
+############--------------##################
+arg1err:
+  echo "ERROR: flag $flag requires one argument"
+  exit 1
+############--------------##################
+
+
+
+############--------------##################
+check_params:
+  if(! $?MCRROOT ) then
+    echo "ERROR: environment variable MCRROOT not set."
+    echo "       Matlab Compiler Runtime (MCR) is required."
+    echo "       e.g. /usr/local/MATLAB/MATLAB_Runtime/v901"
+    exit 1;
+  endif
+  if(! $?input) then
+    echo "ERROR: missing input filename!  See  $0 --help"
+    exit 1;
+  endif
+  if(! -e ${input} ) then
+    echo "ERROR: input file '${input}' does not exist."
+    exit 1;
+  endif
+  if(! $?white) then
+    set white = $input
+  else if (! -e ${white}) then
+    echo "ERROR: input white file '${white}' does not exist."
+    exit 1;
+  endif
+goto check_params_return;
+############--------------##################
+
+
+
+############--------------##################
+usage_exit:
+  echo ""
+  echo "USAGE: $0 [options] --i <input surface>"
+  echo ""
+  echo "Produces local gyrification index measures from the cortical surface."
+  echo "Output file is named <input surface>.lgi.map.<kernel_size>.txt"
+  echo ""
+  echo "Required Arguments"
+  echo "  --i       : input surface vtk file."
+  echo ""
+  echo "Optional Arguments"
+  echo "  --anisotropy <0-1>        : set the amount of anisotropy"
+  echo "                              (default: ${anisotropy})"
+  echo "  --kernel <kernel_size>    : determine kernel size that covers local regions"
+  echo "                              (default: ${kernel})"
+  echo "  --white <white_vtk_file>  : provides white matter surface for better gyral "
+  echo "                              curve extraction"
+  echo "  --help    : short descriptive help"
+  echo "  --version : script version info"
+  echo "  --echo    : enable command echo, for debug"
+  echo "  --debug   : same as --echo"
+  echo "  --dontrun : just show commands (dont run them)"
+  echo ""
+
+  if(! $PrintHelp) exit 1;
+
+  echo Version: $VERSION
+
+  cat $0 | awk 'BEGIN{prt=0}{if(prt) print $0; if($1 == "BEGINHELP") prt = 1 }'
+
+exit 1;
+
+
+#---- Everything below here is printed out as part of help -----#
+BEGINHELP
+
+A cortical folding-adaptive kernel shape to locally quantify localcortical gyrification within sulcal and gyral regions.
+
+References
+[1] Lyu, I., Kim, S., Girault, J., Gilmore, J., Styner, M., A Cortical Shape-Adaptive Approach to Local Gyrification Index, Medical Image Analysis, 48, 244-258, 2018 
+[2] Lyu, I., Kim, S., Bullins, J., Gilmore, J., Styner, M., Novel Local Shape-Adaptive Gyrification Index with Application to Brain Development, Medical Image Computing and Computer Assisted Intervention (MICCAI) 2017, LNCS10433, 31-39, 2017 
+[3] Lyu, I., Kim, S., Woodward, N., Styner, M., Landman, B., TRACE: A Topological Graph Representation for Automatic Sulcal Curve Extraction, IEEE Transactions on Medical Imaging, 37(7), 1653-1663, 2018
+[4] Lee, J., Kim, S., Oguz, I., Styner, M., Enhanced Cortical Thickness Measurements for Rodent Brains via Lagrangian-based RK4 Streamline Computation, SPIE Medical Imaging 2016, SPIE9784, 97840B-1-97840B-10, 2016
+
+Example:
+
+  lgi --i lh.pial.vtk
+
+produces lh.pial.lgi.map.<kernel size>.txt
+
+See also https://github.com/ilwoolyu/LocalGyrificationIndex
+
+Acknowledgement: this command line interface (CLI) is adapted from FreeSurfer's mris_compute_lgi.

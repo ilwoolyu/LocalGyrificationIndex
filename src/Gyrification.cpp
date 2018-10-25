@@ -138,7 +138,12 @@ void Gyrification::open(const char *mesh, const char *sulcus, const char *gyrus,
 		for (int i = 0; i < m_mesh->nVertex(); i++)
 		{
 			int id;
-			fscanf(fp, "%d", &id);
+			if (fscanf(fp, "%d", &id) == -1)
+			{
+				cout << "Fatal error: something goes wrong during I/O processing" << endl;
+				fclose(fp);
+				exit(1);
+			}
 			m_lookup.push_back(id);
 		}
 		fclose(fp);
@@ -149,10 +154,16 @@ void Gyrification::open(const char *mesh, const char *sulcus, const char *gyrus,
 	initVertex();	
 	
 	// read sulcus
-	loadScurve(sulcus);
+	if (!strcmp(&sulcus[strlen(sulcus) - 5], ".bary"))
+		loadScurveBary(sulcus);
+	else
+		loadScurve(sulcus);
 	
 	// read gyrus
-	loadGcurve(gyrus);
+	if (!strcmp(&gyrus[strlen(gyrus) - 5], ".bary"))
+		loadGcurveBary(gyrus);
+	else
+		loadGcurve(gyrus);
 }
 
 void Gyrification::setKernelInterval(double intv)
@@ -493,58 +504,24 @@ void Gyrification::smoothingTensor(int n)
 
 void Gyrification::precomputeArea(void)
 {
-	double maxLen = 0;
-	for (int i = 0; i < m_mesh->nVertex(); i++)
-	{
-		const float *u = m_mesh->vertex(i)->fv();
-		int nn = m_mesh->vertex(i)->nNeighbor();
-		const int *nvlist = m_mesh->vertex(i)->list();
-		for (int j = 0; j < nn; j++)
-		{
-			const float *v = m_mesh->vertex(nvlist[j])->fv();
-			double len = Vector(u, v).norm();
-			if (maxLen < len)
-				maxLen = len;
-		}
-	}
-	cout << "Max len: " << maxLen << endl;
-	double maxArea = 0;
 	for (int i = 0; i < m_mesh->nVertex(); i++)
 	{
 		double area = vertexArea(m_mesh, i);
-		if (maxArea	< area) maxArea	= area;
 		m_areamap1.push_back(area);
 	}
-	cout << "Max area: " << maxArea << endl;
 	int ndefects = 0;
 	for (int i = 0; i < m_outer->nVertex(); i++)
 	{
 		double area = vertexArea(m_outer, i);
-		if (maxArea < area)
+		// hull area cannot exceed the original surface
+		if (m_areamap1[i] < area)
 		{
 			ndefects++;
-			area = 1e-4;
-		}
-		else
-		{
-			int nn = m_outer->vertex(i)->nNeighbor();
-			const float *u = m_outer->vertex(i)->fv();
-			const int *nvlist = m_outer->vertex(i)->list();
-			for (int j = 0; j < nn; j++)
-			{
-				const float *v = m_outer->vertex(nvlist[j])->fv();
-				double len = Vector(u, v).norm();
-				if (maxLen < len)
-				{
-					area = 1e-4;
-					ndefects++;
-					break;
-				}
-			}
+			area = m_areamap1[i];
 		}
 		m_areamap2.push_back(area);
 	}
-	cout << "Total " << ndefects << "small area (1e-4) found from the outer surface" << endl;
+	cout << "Total " << ndefects << " outer hull regions corrected." << endl;
 }
 
 double Gyrification::kernelArea(point *p, const double *dist, const int *state, const double *area, const double size)
@@ -694,7 +671,12 @@ void Gyrification::loadGMap(const char *filename)
 	{
 		float dist;
 		int source;
-		fscanf(fp, "%f %d", &dist, &source);
+		if (fscanf(fp, "%f %d", &dist, &source) == -1)
+		{
+			cout << "Fatal error: something goes wrong during I/O processing" << endl;
+			fclose(fp);
+			exit(1);
+		}
 		m_vertex[i].adjDist = dist;
 		m_vertex[i].source = source;
 	}
@@ -714,7 +696,12 @@ void Gyrification::loadSpoint(const char *filename)
 	for (int i = 0; i < nv; i++)
 	{
 		int flag;
-		fscanf(fp, "%d", &flag);
+		if (fscanf(fp, "%d", &flag) == -1)
+		{
+			cout << "Fatal error: something goes wrong during I/O processing" << endl;
+			fclose(fp);
+			exit(1);
+		}
 		if (flag == 0) continue;
 		int c = 0;
 		vector<point> curve;
@@ -770,6 +757,44 @@ void Gyrification::loadScurve(const char *filename)
 	fin.close();
 }
 
+void Gyrification::loadScurveBary(const char *filename)
+{
+	// setup stream
+	using std::ifstream;
+	char buf[65536];
+	ifstream fin;
+	
+	fin.open(filename);
+	fin.getline(buf, sizeof(buf));
+	int n = atoi(buf);
+	cout << n << endl;
+	for (int group = 0; group < n; group++) 
+	{
+		vector<point> curve;
+		fin.getline(buf, sizeof(buf));
+		int p = atoi(buf);
+		for (int i = 0; i < p; i++) 
+		{
+			fin.getline(buf, sizeof(buf));
+			int id1, id2;
+			float coeff;
+			sscanf(buf, "%d %d %f", &id1, &id2, &coeff);
+			if (id1 == id2 || coeff == 1)
+			{
+				m_vertex[id1].type = 1;
+				m_vertex[id1].group = group;
+				m_vertex[id1].eid = i;
+				curve.push_back(m_vertex[id1]);
+			}
+		}
+		if (!curve.empty())
+		{
+			m_sulcus.push_back(curve);
+		}
+	}
+	fin.close();
+}
+
 void Gyrification::loadGcurve(const char *filename)
 {
 	// setup stream
@@ -805,6 +830,43 @@ void Gyrification::loadGcurve(const char *filename)
 		{
 			m_gyrus.push_back(curve);
 			group++;
+		}
+	}
+	fin.close();
+}
+
+void Gyrification::loadGcurveBary(const char *filename)
+{
+	// setup stream
+	using std::ifstream;
+	char buf[65536];
+	ifstream fin;
+	
+	fin.open(filename);
+	fin.getline(buf, sizeof(buf));
+	int n = atoi(buf);
+	for (int group = 0; group < n; group++) 
+	{
+		vector<point> curve;
+		fin.getline(buf, sizeof(buf));
+		int p = atoi(buf);
+		for (int i = 0; i < p; i++) 
+		{
+			fin.getline(buf, sizeof(buf));
+			int id1, id2;
+			float coeff;
+			sscanf(buf, "%d %d %f", &id1, &id2, &coeff);
+			if (id1 == id2 || coeff == 1)
+			{
+				m_vertex[id1].type = 2;
+				m_vertex[id1].group = group;
+				m_vertex[id1].eid = i;
+				curve.push_back(m_vertex[id1]);
+			}
+		}
+		if (!curve.empty())
+		{
+			m_sulcus.push_back(curve);
 		}
 	}
 	fin.close();

@@ -3,7 +3,7 @@
 	<title>Gyrification Index</title>
 	<version>1.0</version>
 	<contributor>Ilwoo Lyu</contributor>
-	<description>Cortical Shape-Adaptive Local Gyrification Index. Please refer to the following paper for details: Lyu et al., Novel Local Shape-Adaptive Gyrification Index with Application to Brain Development, MICCAI 2017</description>
+	<description>Cortical Shape-Adaptive Local Gyrification Index. Please refer to the following papers for details: Lyu et al., A Cortical Shape-Adaptive Approach to Local Gyrification Index, Medical Image Analysis, 2018, Lyu et al., Novel Local Shape-Adaptive Gyrification Index with Application to Brain Development, LNCS10433, 31-39, MICCAI 2017</description>
 		<parameters>
 			<string>
 				<longflag>input</longflag>
@@ -15,14 +15,14 @@
 				<longflag>gyrus</longflag>
 				<flag>g</flag>
 				<name>gcurve</name>
-				<description>Input gyral curve (required)</description>
+				<description>Input gyral region: *.gcurve|*.gcurve.bary (required)</description>
 				<default></default>
 			</string>
 			<string>
 				<longflag>sulcus</longflag>
 				<flag>s</flag>
 				<name>scurve</name>
-				<description>Input sulcal curve (required)</description>
+				<description>Input sulcal region: *.scurve|*.scurve.bary (required)</description>
 				<default></default>
 			</string>
 			<string>
