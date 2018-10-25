@@ -1,6 +1,6 @@
 #!/bin/tcsh -f
 
-set VERSION = '$Id: Ilwoo Lyu, Cortical Shape Adaptive Local Gyrification Index v1.0 $'
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.0 $'
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
@@ -9,7 +9,6 @@ set kernel = 316
 set runtime_path = $0:h
 #set echo=1
 set start=`date`
-
 if ($#argv == 0) then
 	goto usage_exit;
 endif
@@ -23,7 +22,14 @@ check_params_return:
 #---------
 
 # temporary work files go here...
-set tmpdir = ($PWD/tmp-lgi-${input:t:r:t})
+set work_path = $PWD
+if("$work_path" == "/") then
+  set work_path = $input:h
+endif
+if("$runtime_path" == "") then
+  set runtime_path = '.'
+endif
+set tmpdir = ($work_path/tmp-lgi-${input:t:r:t})
 set cmd=(rm -Rf $tmpdir)
 echo "================="
 echo "$cmd"
@@ -114,7 +120,7 @@ if($status) then
   echo "ERROR: $cmd failed!"
   exit 1;
 endif
-set cmd=(mv "${tmpdir}/${input:r:t}.lgi.map.*.txt" "$PWD")
+set cmd=(mv "${tmpdir}/${input:r:t}.lgi.map.*.txt" "$work_path")
 echo "================="
 echo "$cmd"
 echo "================="
