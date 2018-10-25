@@ -1,3 +1,7 @@
+% Ilwoo Lyu, ilwoolyu@gmail.com
+% Release: OCt 25, 2018
+% Update: OCt 25, 2018
+
 function OuterHull(vtk_input, vtk_output)
     % ensure types
     assert(isa(vtk_input, 'char'))

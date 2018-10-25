@@ -1,3 +1,7 @@
 % This is for MATLAB Compiler Runtime (MCR).
-mcc -m voxelizer.m -d exec -a VOXELISE
-delete exec/*.txt exec/*.sh exec/*.log
+% MCR packages are required: MCR_R2016a_glnxa64_installer.zip
+mkdir exec
+mcc -m OuterHull.m -d exec -a VOXELISE
+movefile exec/OuterHull ../script
+delete exec/*
+rmdir exec
