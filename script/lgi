@@ -36,10 +36,10 @@ echo "================="
 if ($RunIt) $cmd
 
 #
-# hull
+# make_outer_hull
 #
 # create a cerebral hull that tightly envelop the surface
-set cmd=($runtime_path/hull ${input} ${tmpdir}/${input:r:t}.hull.vtk)
+set cmd=($runtime_path/make_outer_hull ${input} ${tmpdir}/${input:r:t}.hull.vtk)
 echo "================="
 echo "$cmd"
 echo "================="

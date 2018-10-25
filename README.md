@@ -4,19 +4,24 @@
 The amount of cortical folding, or gyrification, is typically measured within local cortical regions covered by an equidistant geodesic or nearest neighborhood-ring kernel. However, without careful design, such a kernel can easily cover multiple sulcal and gyral regions that may not be functionally related. Furthermore, this can result in smoothing out details of cortical folding, which consequently blurs local gyrification measurements. Here, we propose a novel kernel shape to locally quantify cortical gyrification within sulcal and gyral regions.
 ### Input
 * surface file (.vtk or FreeSurfer outputs - ?h.pial and/or ?h.white): triangular 3D mesh
-* sulcal and gyral curves (.scurve and .gcurve): outputs of <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction</a> [3]
+* sulcal and gyral curves (.scurve and .gcurve - or .bary): outputs of <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction</a> [3]
 * outer hull file (.vtk): output of <a href="https://github.com/ilwoolyu/klaplace">klaplace</a> [4]
 ### Output
 * lgi file (.txt): local gyrification index per vertex
 ### Usage
+After build and install the required packages, type:
+```
+script/lgi --i input.vtk
+```
+### Details
 #### Sulcal/gyral curve extraction
 Our tools do not provide native FreeSurfer surfaces yet. To use FreeSurfer surfaces, we may convert "input" using the following FreeSurfer command:
 ```
 mris_convert input input.vtk
 ```
-The following command line will generate "output.scurve" and "output.gcurve":<br />
+The following command line will generate "output.scurve", "output.gcurve", and ".bary":<br />
 ```
-CurveExtraction -i input.vtk -o output --sulcus --gyrus --noVtk
+CurveExtraction -i input.vtk -o output --sulcus --gyrus --bary --noVtk
 ```
 Or if both pial and white surfaces are available, the following commands give better extraction results:<br />
 ```
@@ -28,7 +33,7 @@ To create outer hull, an initial outer hull surface needs to be generated. The c
 
 To create a binary volume image of the input surface using <a href="https://www.mathworks.com/matlabcentral/fileexchange/27390-mesh-voxelisation">Mesh voxelisation</a>. From the volume (input_filled_vol.mgz), the outer hull can be obtained using <a href="https://www.mathworks.com/help/matlab/ref/isosurface.html">isosurface</a>. Both are implemented in MATLAB.<br />
 ```
-voxelizer('input.vtk', 'outer_hull.vtk');
+OuterHull('input.vtk', 'outer_hull.vtk');
 ```
 #### Outer hull correspondence
 To find a Laplacian shape correspondence, the following command will give Laplacian trajectories:<br />
