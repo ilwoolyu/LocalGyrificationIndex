@@ -30,8 +30,7 @@ CurveExtraction -i white.vtk -o output --gyrus --bary --noVtk
 ```
 #### Outer hull creation
 To create outer hull, an initial outer hull surface needs to be generated. The cortical surface is voxelized and the morphological operation is applied on it.<br />
-
-To create a binary volume image of the input surface using <a href="https://www.mathworks.com/matlabcentral/fileexchange/27390-mesh-voxelisation">Mesh voxelisation</a>. From the volume (input_filled_vol.mgz), the outer hull can be obtained using <a href="https://www.mathworks.com/help/matlab/ref/isosurface.html">isosurface</a>. Both are implemented in MATLAB.<br />
+To create a binary volume image of the input surface using <a href="https://www.mathworks.com/matlabcentral/fileexchange/27390-mesh-voxelisation">Mesh voxelisation</a>. From the volume, the outer hull can be obtained using <a href="https://www.mathworks.com/help/matlab/ref/isosurface.html">isosurface</a>. Both are implemented in MATLAB.<br />
 ```
 OuterHull('input.vtk', 'outer_hull.vtk');
 ```
