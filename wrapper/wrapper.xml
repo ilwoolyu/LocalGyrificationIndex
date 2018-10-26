@@ -99,7 +99,7 @@
 			<double>
 				<longflag>populationArea</longflag>
 				<name>populationArea</name>
-				<description>Expected population area</description>
+				<description>Expected population area (0: ignore kernel size adjustment, 166000: adult average used in Lyu et al. 2018)</description>
 				<default>0</default>
 			</double>
 		</parameters>
