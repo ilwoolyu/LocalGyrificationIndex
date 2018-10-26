@@ -1,12 +1,13 @@
 #!/bin/tcsh -f
 
-set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.0 $'
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.1 $'
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
 set anisotropy = 0.2
 set kernel = 316
 set runtime_path = $0:h
+set refarea = 0
 #set echo=1
 set start=`date`
 if ($#argv == 0) then
@@ -111,7 +112,7 @@ endif
 # Gyrification
 #
 # compute a local gyrification index map
-set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy)
+set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy --populationArea $refarea)
 echo "================="
 echo "$cmd"
 echo "================="
@@ -158,6 +159,11 @@ while( $#argv != 0 )
    case "--kernel":
       set kernel = $argv[1]; shift;
       echo "Using kernel size of ${kernel} mm^2 to cover local regions."
+      breaksw
+
+   case "--ref":
+      set refarea = $argv[1]; shift;
+      echo "Using reference area of ${refarea} mm^2 to adjust kernel size."
       breaksw
 
    case "-h":
@@ -252,12 +258,15 @@ usage_exit:
   echo "  --i       : input surface vtk file."
   echo ""
   echo "Optional Arguments"
-  echo "  --anisotropy <0-1>        : set the amount of anisotropy"
+  echo "  --anisotropy <0-1>        : sets the amount of anisotropy"
   echo "                              (default: ${anisotropy})"
-  echo "  --kernel <kernel_size>    : determine kernel size that covers local regions"
+  echo "  --kernel <kernel_size>    : determines kernel size that covers local regions"
   echo "                              (default: ${kernel})"
   echo "  --white <white_vtk_file>  : provides white matter surface for better gyral "
   echo "                              curve extraction"
+  echo "  --ref <reference_area>    : set the reference area for kernel size adjustment "
+  echo "                              166000 used in Lyu et al. 2018"
+  echo "                              (default: ${refarea})"
   echo "  --help    : short descriptive help"
   echo "  --version : script version info"
   echo "  --echo    : enable command echo, for debug"

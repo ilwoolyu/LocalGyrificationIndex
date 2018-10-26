@@ -3,7 +3,7 @@
 ## Introduction
 The amount of cortical folding, or gyrification, is typically measured within local cortical regions covered by an equidistant geodesic or nearest neighborhood-ring kernel. However, without careful design, such a kernel can easily cover multiple sulcal and gyral regions that may not be functionally related. Furthermore, this can result in smoothing out details of cortical folding, which consequently blurs local gyrification measurements. Here, we propose a novel kernel shape to locally quantify cortical gyrification within sulcal and gyral regions.
 ### Input
-* surface file (.vtk or FreeSurfer outputs - ?h.pial and/or ?h.white): triangular 3D mesh
+* surface file (.vtk): triangular 3D mesh
 * sulcal and gyral curves (.scurve and .gcurve - or .bary): outputs of <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction</a> [3]
 * outer hull file (.vtk): output of <a href="https://github.com/ilwoolyu/klaplace">klaplace</a> [4]
 ### Output
@@ -15,10 +15,6 @@ script/lgi --i input.vtk
 ```
 ### Details
 #### Sulcal/gyral curve extraction
-Our tools do not provide native FreeSurfer surfaces yet. To use FreeSurfer surfaces, we may convert "input" using the following FreeSurfer command:
-```
-mris_convert input input.vtk
-```
 The following command line will generate "output.scurve", "output.gcurve", and ".bary":<br />
 ```
 CurveExtraction -i input.vtk -o output --sulcus --gyrus --bary --noVtk
