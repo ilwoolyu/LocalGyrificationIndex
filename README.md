@@ -33,7 +33,7 @@ OuterHull('input.vtk', 'outer_hull.vtk');
 #### Outer hull correspondence
 To find a Laplacian shape correspondence, the following command will give Laplacian trajectories:<br />
 ```
-klaplace -dims 256 input.vtk outer_hull.vtk -surfaceCorrespondence outer_hull
+klaplace -dims 128 input.vtk outer_hull.vtk -surfaceCorrespondence outer_hull
 ```
 The trjectories will be generated in "outer_hull_warpedMesh.vtp".
 Let's trace the final destinations of the trajectories to obtain the outer hull:<br />
