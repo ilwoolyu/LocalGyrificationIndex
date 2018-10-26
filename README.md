@@ -8,12 +8,29 @@ The amount of cortical folding, or gyrification, is typically measured within lo
 * outer hull file (.vtk): output of <a href="https://github.com/ilwoolyu/klaplace">klaplace</a> [4]
 ### Output
 * lgi file (.txt): local gyrification index per vertex
+
+### Installation
+You can download and compile the source code using <a href="https://cmake.org/">CMake</a>. Or you can pull <a href="https://hub.docker.com/r/ilwoolyu/cmorph/">docker image</a>:
+```
+docker pull ilwoolyu/cmorph:1.0
+```
 ### Usage
 After build and install the required packages, type:
 ```
 script/lgi --i input.vtk
 ```
-### Details
+If you have both pial and white surfaces, the results will be more accurate. Type:
+```
+script/lgi --i pial.vtk --white white.vtk
+```
+In Docker, you need a sudo acces. To run local gyrification, type:
+```
+sudo docker run \
+            -v <LOCAL_INPUT_PATH>:/INPUT/ \
+            --rm ilwoolyu/cmorph:1.0 \
+            lgi --i /INPUT/input.vtk
+```
+### Implementation Details
 #### Sulcal/gyral curve extraction
 The following command line will generate "output.scurve", "output.gcurve", and ".bary":<br />
 ```
