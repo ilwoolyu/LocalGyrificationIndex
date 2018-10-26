@@ -63,6 +63,7 @@ void Gyrification::run(double rad)
 	if (m_populationArea == 0) m_populationArea = totalArea();
 	m_adjRatio = totalArea() / m_populationArea;
 	cout << "  Adjusted ratio: " << m_adjRatio << endl;
+	cout << "  Adjusted size: " << (m_maxArea * m_adjRatio) << endl;
 	
 	cout << "- Gyrification Index" << endl;
 	tstart = clock();
@@ -92,6 +93,7 @@ void Gyrification::run(const char *map)
 	if (m_populationArea == 0) m_populationArea = totalArea();
 	m_adjRatio = totalArea() / m_populationArea;
 	cout << "  Adjusted ratio: " << m_adjRatio << endl;
+	cout << "  Adjusted size: " << (m_maxArea * m_adjRatio) << endl;
 	
 	cout << "- Gyrification Index" << endl;
 	tstart = clock();
@@ -421,7 +423,7 @@ void Gyrification::computeGyrification(void)
 			fflush(stdout);
 			//tstart = clock();
 		}
-		gd.perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea  * m_adjRatio);
+		gd.perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea * m_adjRatio);
 
 		for (int t = 0; t < n; t++)
 		{
@@ -767,7 +769,6 @@ void Gyrification::loadScurveBary(const char *filename)
 	fin.open(filename);
 	fin.getline(buf, sizeof(buf));
 	int n = atoi(buf);
-	cout << n << endl;
 	for (int group = 0; group < n; group++) 
 	{
 		vector<point> curve;
@@ -928,7 +929,7 @@ double Gyrification::totalArea(void)
 	double area = 0;
 	for (int i = 0; i < m_mesh->nVertex(); i++)
 	{
-		area += m_areamap2[i];
+		area += m_areamap1[i];
 	}
 	return area;
 }
