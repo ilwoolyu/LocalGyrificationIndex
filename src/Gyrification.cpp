@@ -63,6 +63,7 @@ void Gyrification::run(double rad)
 	if (m_populationArea == 0) m_populationArea = totalArea();
 	m_adjRatio = totalArea() / m_populationArea;
 	m_maxArea *= m_adjRatio;
+	m_intv *= m_adjRatio;
 	cout << "  Adjusted ratio: " << m_adjRatio << endl;
 	cout << "  Adjusted size: " << m_maxArea << endl;
 	
@@ -94,6 +95,7 @@ void Gyrification::run(const char *map)
 	if (m_populationArea == 0) m_populationArea = totalArea();
 	m_adjRatio = totalArea() / m_populationArea;
 	m_maxArea *= m_adjRatio;
+	m_intv *= m_adjRatio;
 	cout << "  Adjusted ratio: " << m_adjRatio << endl;
 	cout << "  Adjusted size: " << m_maxArea << endl;
 	
