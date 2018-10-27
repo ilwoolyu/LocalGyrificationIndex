@@ -62,8 +62,9 @@ void Gyrification::run(double rad)
 	cout << "- Area Adjustment" << endl;
 	if (m_populationArea == 0) m_populationArea = totalArea();
 	m_adjRatio = totalArea() / m_populationArea;
+	m_maxArea *= m_adjRatio;
 	cout << "  Adjusted ratio: " << m_adjRatio << endl;
-	cout << "  Adjusted size: " << (m_maxArea * m_adjRatio) << endl;
+	cout << "  Adjusted size: " << m_maxArea << endl;
 	
 	cout << "- Gyrification Index" << endl;
 	tstart = clock();
@@ -92,8 +93,9 @@ void Gyrification::run(const char *map)
 	cout << "- Area Adjustment" << endl;
 	if (m_populationArea == 0) m_populationArea = totalArea();
 	m_adjRatio = totalArea() / m_populationArea;
+	m_maxArea *= m_adjRatio;
 	cout << "  Adjusted ratio: " << m_adjRatio << endl;
-	cout << "  Adjusted size: " << (m_maxArea * m_adjRatio) << endl;
+	cout << "  Adjusted size: " << m_maxArea << endl;
 	
 	cout << "- Gyrification Index" << endl;
 	tstart = clock();
@@ -408,7 +410,7 @@ void Gyrification::computeGyrification(void)
 	// velocity map
 	gd.setTensor((const double **)m_u, (const double *)m_lam1, (const double *)m_lam2);
 
-	if (m_intv == 0) m_intv = m_maxArea * m_adjRatio;
+	if (m_intv == 0) m_intv = m_maxArea;
 
 	int n = (int)ceil(m_maxArea / m_intv);
 	time_t tstart = clock();
@@ -423,12 +425,12 @@ void Gyrification::computeGyrification(void)
 			fflush(stdout);
 			//tstart = clock();
 		}
-		gd.perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea * m_adjRatio);
+		gd.perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea);
 
 		for (int t = 0; t < n; t++)
 		{
-			double delta = m_intv * (t + 1) * m_adjRatio;
-			if (delta > m_maxArea * m_adjRatio) delta = m_maxArea * m_adjRatio;
+			double delta = m_intv * (t + 1);
+			if (delta > m_maxArea) delta = m_maxArea;
 
 			m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist, state, area, delta));
 		}
