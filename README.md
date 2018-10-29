@@ -10,6 +10,7 @@ $ docker pull ilwoolyu/cmorph:1.0
 ## Usage
 ### Input
 * surface file (.vtk): triangular 3D mesh
+### Intermediate input and output
 * sulcal and gyral curves (.scurve and .gcurve - or .bary): outputs of <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction</a> [[3]](#ref3)
 * outer hull file (.vtk): output of <a href="https://github.com/ilwoolyu/klaplace">klaplace</a> [[4]](#ref4)
 ### Output
@@ -67,8 +68,9 @@ Let's trace the final destinations of the trajectories to obtain the outer hull:
 ```
 $ klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 ```
-* Note 1: It would be useful if do some smoothing on "outer_hull_corr.vtk" since it's very rough mesh since isosurface does not provide smooth mesh.
-* Note 2: Since the outputs of klaplace consume a huge disk space, it is recommended to delete all but "outer_hull_corr.vtk".<br />
+> Note 1: It would be useful if do some smoothing on "outer_hull_corr.vtk" since it's very rough mesh since isosurface does not provide smooth mesh.
+
+> Note 2: Since the outputs of klaplace consume a huge disk space, it is recommended to delete all but "outer_hull_corr.vtk".<br />
 ### Local gyrification index
 The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt":
 ```
@@ -76,8 +78,9 @@ $ Gyrification -i input.vtk -o output --outer outer_hull_corr.vtk -s output.scur
 ```
 Note barycentric curves can provide dense points along sulcal/gyral regions.
 More technical details (theory, parameter choice, etc.) can be found in [[1](#ref1),[2](#ref2)].<br />
-* Note 1: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area.
-* Note 2: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
+> Note 1: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area.
+
+> Note 2: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
 ## Dependency
 * <a href="https://github.com/ilwoolyu/MeshLib">MeshLib (general mesh processing)</a><br />
 * <a href="https://github.com/Slicer/SlicerExecutionModel">SlicerExecutionModel (CLI)</a>
