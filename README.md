@@ -1,9 +1,10 @@
 # Local Gyrification Index
 
-![image](https://user-images.githubusercontent.com/9325798/47693044-f9c0c300-dbc5-11e8-8daf-fb36789b5427.png)
-
 ## Description
 The amount of cortical folding, or gyrification, is typically measured within local cortical regions covered by an equidistant geodesic or nearest neighborhood-ring kernel. However, without careful design, such a kernel can easily cover multiple sulcal and gyral regions that may not be functionally related. Furthermore, this can result in smoothing out details of cortical folding, which consequently blurs local gyrification measurements. In this paper, we propose a novel kernel shape to locally quantify cortical gyrification within sulcal and gyral regions. We adapt wavefront propagation to generate a spatially varying kernel shape that encodes cortical folding patterns: neighboring gyral crowns, sulcal fundi, and sulcal banks. For this purpose, we perform anisotropic wavefront propagation that runs fast along gyral crowns and sulcal fundi by solving a static Hamilton–Jacobi partial differential equation. The resulting kernel adaptively elongates along gyral crowns and sulcal fundi, while keeping a uniform shape over flat regions like sulcal banks. We then measure local gyrification within the proposed spatially varying kernel.
+
+![image](https://user-images.githubusercontent.com/9325798/47728629-b6e60600-dc2c-11e8-8138-094841ae5c46.png)
+
 ## Installation
 You can download and compile the source code using <a href="https://cmake.org/">CMake</a>. Or you can pull <a href="https://hub.docker.com/r/ilwoolyu/cmorph/">docker image</a>:
 ```
@@ -34,7 +35,8 @@ If you have a known reference population area, the kernel size will be automatic
 ```
 $ script/lgi --ref <area mm^2>
 ```
-For example, if kernel size=300 mm^2, reference area=150000 mm^2, input surface area=100000 mm^2, the kernel size is adjusted to 200 mm^2. In our work [[1](#ref1),[2](#ref2)], we used reference area of 166000 mm^2 with kernel size of 316 mm^2.
+For example, if kernel size=300 mm^2, reference area=150000 mm^2, input surface area=100000 mm^2, the kernel size is adjusted to 200 mm^2. In our work [[1](#ref1),[2](#ref2)], we used reference area of 166000 mm^2 with kernel size of 316 mm^2. To disable the kernel size adjustment, set --ref 0 or ignore this argument (default: 0).
+>**Note**: Please use --ref **166000** with --kernel **316** for consistent quantification independent of individual surfce areas unless you know a specific kernel size for each individual or plan to use an absolute kernel size.
 
 In Docker, you need a sudo acces. To run local gyrification, type:
 ```
@@ -78,11 +80,18 @@ $ klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 ### Local gyrification index
 The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt":
 ```
-$ Gyrification -i input.vtk -o output --outer outer_hull_corr.vtk -s output.scurve.bary -g output.gcurve.bary -m 316 --speed 0.2
+$ Gyrification \
+               -i input.vtk \
+               -o output \
+               --outer outer_hull_corr.vtk \
+               -s output.scurve.bary \
+               -g output.gcurve.bary \
+               -m 316 \
+               --speed 0.2
 ```
 Note barycentric curves can provide dense points along sulcal/gyral regions.
 More technical details (theory, parameter choice, etc.) can be found in [[1](#ref1),[2](#ref2)].
-> **Note 1**: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area.
+> **Note 1**: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area. The use of --poulationArea is *recommended* particularly for neurodevelopmental studies.
 
 > **Note 2**: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
 
