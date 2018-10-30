@@ -1,5 +1,7 @@
 # Local Gyrification Index
 
+![image](https://user-images.githubusercontent.com/9325798/47693044-f9c0c300-dbc5-11e8-8daf-fb36789b5427.png)
+
 ## Description
 The amount of cortical folding, or gyrification, is typically measured within local cortical regions covered by an equidistant geodesic or nearest neighborhood-ring kernel. However, without careful design, such a kernel can easily cover multiple sulcal and gyral regions that may not be functionally related. Furthermore, this can result in smoothing out details of cortical folding, which consequently blurs local gyrification measurements. In this paper, we propose a novel kernel shape to locally quantify cortical gyrification within sulcal and gyral regions. We adapt wavefront propagation to generate a spatially varying kernel shape that encodes cortical folding patterns: neighboring gyral crowns, sulcal fundi, and sulcal banks. For this purpose, we perform anisotropic wavefront propagation that runs fast along gyral crowns and sulcal fundi by solving a static Hamilton–Jacobi partial differential equation. The resulting kernel adaptively elongates along gyral crowns and sulcal fundi, while keeping a uniform shape over flat regions like sulcal banks. We then measure local gyrification within the proposed spatially varying kernel.
 ## Installation
@@ -32,63 +34,66 @@ If you have a known reference population area, the kernel size will be automatic
 ```
 $ script/lgi --ref <area mm^2>
 ```
-For example, if kernel size=300, reference area=150000, input surface area=100000, the adjusted kernel size=200. In the paper, we used reference area of 166000 with kernel size of 316 [[1](#ref1),[2](#ref2)].
+For example, if kernel size=300 mm^2, reference area=150000 mm^2, input surface area=100000 mm^2, the kernel size is adjusted to 200 mm^2. In our work [[1](#ref1),[2](#ref2)], we used reference area of 166000 mm^2 with kernel size of 316 mm^2.
 
 In Docker, you need a sudo acces. To run local gyrification, type:
 ```
 $ docker run \
          -v <LOCAL_INPUT_PATH>:/INPUT/ \
          --rm ilwoolyu/cmorph:1.0 \
-         lgi --i /INPUT/input.vtk
+         lgi -i /INPUT/input.vtk
 ```
 ## Implementation Details
 ### Sulcal/gyral curve extraction
-The following command line will generate "output.scurve", "output.gcurve", and ".bary":<br />
+The following command line will generate "output.scurve", "output.gcurve", and ".bary":
 ```
 $ CurveExtraction -i input.vtk -o output --sulcus --gyrus --bary --noVtk
 ```
-Or if both pial and white surfaces are available, the following commands give better extraction results:<br />
+Or if both pial and white surfaces are available, the following commands give better extraction results:
 ```
 $ CurveExtraction -i pial.vtk -o output --sulcus --bary --noVtk
 $ CurveExtraction -i white.vtk -o output --gyrus --bary --noVtk
 ```
+See [CurveExtraction (sulcal/gyral curves)](https://github.com/ilwoolyu/CurveExtraction) for more options.
 ### Outer hull creation
-To create outer hull, an initial outer hull surface needs to be generated. The cortical surface is voxelized and the morphological operation is applied on it.<br />
-To create a binary volume image of the input surface using <a href="https://www.mathworks.com/matlabcentral/fileexchange/27390-mesh-voxelisation">Mesh voxelisation</a>. From the volume, the outer hull can be obtained using <a href="https://www.mathworks.com/help/matlab/ref/isosurface.html">isosurface</a>. Both are implemented in MATLAB.<br />
+An initial outer hull surface needs to be generated for outer hull creation. The cortical surface is voxelized and the morphological operation is applied on it.
+
+To create a binary volume image of the input surface using <a href="https://www.mathworks.com/matlabcentral/fileexchange/27390-mesh-voxelisation">Mesh voxelisation</a>. From the volume, the outer hull can be obtained using <a href="https://www.mathworks.com/help/matlab/ref/isosurface.html">isosurface</a>. Both are implemented in MATLAB.
 ```
 $ matlab OuterHull('input.vtk', 'outer_hull.vtk');
 ```
 ### Outer hull correspondence
-To find a Laplacian shape correspondence, the following command will give Laplacian trajectories:<br />
+To find a Laplacian shape correspondence, the following command will give Laplacian trajectories using [klaplace (outer hull correspondence)](https://github.com/ilwoolyu/klaplace):
 ```
 $ klaplace -dims 128 input.vtk outer_hull.vtk -surfaceCorrespondence outer_hull
 ```
 The trjectories will be generated in "outer_hull_warpedMesh.vtp".
-Let's trace the final destinations of the trajectories to obtain the outer hull:<br />
+Let's trace the final destinations of the trajectories to obtain the outer hull:
 ```
 $ klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 ```
-> Note 1: It would be useful if do some smoothing on "outer_hull_corr.vtk" since it's very rough mesh since isosurface does not provide smooth mesh.
+> **Note 1**: It would be useful if do some smoothing on "outer_hull_corr.vtk" since it's very rough mesh since isosurface does not provide smooth mesh.
 
-> Note 2: Since the outputs of klaplace consume a huge disk space, it is recommended to delete all but "outer_hull_corr.vtk".<br />
+> **Note 2**: Since the outputs of klaplace consume a huge disk space, it is recommended to delete all but "outer_hull_corr.vtk".
 ### Local gyrification index
 The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt":
 ```
 $ Gyrification -i input.vtk -o output --outer outer_hull_corr.vtk -s output.scurve.bary -g output.gcurve.bary -m 316 --speed 0.2
 ```
 Note barycentric curves can provide dense points along sulcal/gyral regions.
-More technical details (theory, parameter choice, etc.) can be found in [[1](#ref1),[2](#ref2)].<br />
-> Note 1: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area.
+More technical details (theory, parameter choice, etc.) can be found in [[1](#ref1),[2](#ref2)].
+> **Note 1**: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area.
 
-> Note 2: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
+> **Note 2**: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
+
 ## Dependency
-* <a href="https://github.com/ilwoolyu/MeshLib">MeshLib (general mesh processing)</a><br />
-* <a href="https://github.com/Slicer/SlicerExecutionModel">SlicerExecutionModel (CLI)</a>
+* [MeshLib (general mesh processing)](https://github.com/ilwoolyu/MeshLib)
+* [SlicerExecutionModel (CLI)](https://github.com/Slicer/SlicerExecutionModel)
 
 ## Required Components
-* <a href="https://github.com/ilwoolyu/CurveExtraction">CurveExtraction (sulcal/gyral curves)</a>
-* <a href="https://github.com/ilwoolyu/klaplace">klaplace (outer hull correspondence)</a>
-* <a href="https://www.mathworks.com/products/matlab.html">MATLAB (initial outer hull creation)</a>
+* [CurveExtraction (sulcal/gyral curves)](https://github.com/ilwoolyu/CurveExtraction)
+* [klaplace (outer hull correspondence)](https://github.com/ilwoolyu/klaplace)
+* [MATLAB (initial outer hull creation)](https://www.mathworks.com/products/matlab.html)
 
 ## References
 <ol>
