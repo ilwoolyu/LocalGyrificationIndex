@@ -89,7 +89,12 @@ $ Gyrification \
                -m 316 \
                --speed 0.2
 ```
-Note barycentric curves can provide dense points along sulcal/gyral regions.
+Barycentric curves can provide dense points along sulcal/gyral regions.
+
+To enable multi-thread support (OpenMP):
+```
+$ HSD --nThreads <# of threads>
+```
 More technical details (theory, parameter choice, etc.) can be found in [[1](#ref1),[2](#ref2)].
 > **Note 1**: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area. The use of --poulationArea is *recommended* particularly for neurodevelopmental studies.
 

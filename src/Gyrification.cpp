@@ -14,6 +14,7 @@
 #include <fstream>
 #include <ctime>
 #include <cstdlib>
+#include <omp.h>
 #include "Gyrification.h"
 #include "Util/SurfaceUtil.h"
 #include "Util/Geom.h"
@@ -388,16 +389,16 @@ void Gyrification::computeGyrification(void)
 {
 	// setup gd
 	GeodesicA **gd = new GeodesicA*[m_nThreads];
-	const double **dist;
-	const int **state;
-	const double **area;
+	const double **dist = new const double*[m_nThreads];
+	const int **state = new const int*[m_nThreads];
+	const double **area = new const double*[m_nThreads];
 	for (int i = 0; i < m_nThreads; i++)
 	{
 		gd[i] = new GeodesicA(m_mesh);
+                gd[i]->setArea((const double *)&m_areamap2[0]); // if outer area is constant
 		dist[i] = gd[i]->dist();
 		state[i] = gd[i]->state();
 		area[i] = gd[i]->area();
-		gd[i]->setArea((const double *)&m_areamap2[0]);	// if outer area is constant
 	}
 	
 	setupTensorEqualArea();
@@ -428,7 +429,7 @@ void Gyrification::computeGyrification(void)
 	if (m_intv == 0) m_intv = m_maxArea;
 
 	int n = (int)ceil(m_maxArea / m_intv);
-	time_t tstart = clock();
+	double tstart = omp_get_wtime();
 
 	int done = 0;
 	int threadID = 0;
@@ -436,18 +437,7 @@ void Gyrification::computeGyrification(void)
 	#pragma omp parallel for private(threadID)
 	for (int i = 0; i < m_mesh->nVertex(); i++)
 	{
-		#pragma omp critical
-		{
-			if (done % 1000 == 0)
-			{
-				elapse = (double)(clock() - tstart) / CLOCKS_PER_SEC;
-				cout << "\rVertex " << done << ": ";
-				cout << elapse << " sec elapsed";
-				fflush(stdout);
-				//tstart = clock();
-			}
-			done++;
-		}
+		threadID = omp_get_thread_num();
 		gd[threadID]->perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea);
 
 		for (int t = 0; t < n; t++)
@@ -457,8 +447,20 @@ void Gyrification::computeGyrification(void)
 
 			m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist[threadID], state[threadID], area[threadID], delta));
 		}
+                #pragma omp critical
+                {
+                        if (done % 1000 == 0)
+                        {
+                                elapse = omp_get_wtime() - tstart;
+                                cout << "\rVertex " << done << ": ";
+                                cout << elapse << " sec elapsed";
+                                fflush(stdout);
+                                //tstart = clock();
+                        }
+                        done++;
+                }
 	}
-	elapse = (double)(clock() - tstart) / CLOCKS_PER_SEC;
+	elapse = omp_get_wtime() - tstart;
 	cout << "\rVertex " << m_mesh->nVertex() << ": ";
 	cout << elapse << " sec elapsed\n";
 	fflush(stdout);
@@ -468,6 +470,9 @@ void Gyrification::computeGyrification(void)
 	for (int i = 0; i < m_nThreads; i++)
 		delete gd[i];
 	delete [] gd;
+	delete [] dist;
+	delete [] state;
+	delete [] area;
 }
 
 void Gyrification::smoothingScalar(double *scalar, int n)

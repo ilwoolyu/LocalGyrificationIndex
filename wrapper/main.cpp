@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 #ifdef _USE_OPENMP
 	if (nThreads == 0) nThreads = std::max(atoi(getenv("OMP_NUM_THREADS")), 1);
 	omp_set_num_threads(nThreads);
-	gi.setSpeed(nThreads);
+	gi.setThreads(nThreads);
 #endif
 	
 	if (map.empty()) gi.run(rad);
