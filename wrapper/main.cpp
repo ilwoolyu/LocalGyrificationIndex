@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 	gi.setKernelInterval(intvArea);
 	gi.setMaxKernelSize(maxArea);
 	gi.setSpeed(speed);
+	gi.setSpeed(nThreads);
 	
 	if (map.empty()) gi.run(rad);
 	else gi.run(map.c_str());

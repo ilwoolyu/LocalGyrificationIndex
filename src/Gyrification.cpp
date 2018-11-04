@@ -106,6 +106,11 @@ void Gyrification::run(const char *map)
 	cout << elapse << " sec elapsed" << endl;
 }
 
+void Gyrification::setThreads(int nThreads)
+{
+	m_nThreads = nThreads;
+}
+
 void Gyrification::initVertex(void)
 {
 	int nv = m_mesh->nVertex();
@@ -382,11 +387,18 @@ void Gyrification::setupTensorEqualArea(void)
 void Gyrification::computeGyrification(void)
 {
 	// setup gd
-	GeodesicA gd(m_mesh);
-	gd.setArea((const double *)&m_areamap2[0]);	// if outer area is constant
-	const double *dist = gd.dist();
-	const int *state = gd.state();
-	const double *area = gd.area();
+	GeodesicA **gd = new GeodesicA*[m_nThreads];
+	const double **dist;
+	const int **state;
+	const double **area;
+	for (int i = 0; i < m_nThreads; i++)
+	{
+		gd[i] = new GeodesicA(m_mesh);
+		dist[i] = gd[i]->dist();
+		state[i] = gd[i]->state();
+		area[i] = gd[i]->area();
+		gd[i]->setArea((const double *)&m_areamap2[0]);	// if outer area is constant
+	}
 	
 	setupTensorEqualArea();
 	
@@ -410,13 +422,16 @@ void Gyrification::computeGyrification(void)
 	cout << endl;
 	
 	// velocity map
-	gd.setTensor((const double **)m_u, (const double *)m_lam1, (const double *)m_lam2);
+	for (int i = 0; i < m_nThreads; i++)
+		gd[i]->setTensor((const double **)m_u, (const double *)m_lam1, (const double *)m_lam2);
 
 	if (m_intv == 0) m_intv = m_maxArea;
 
 	int n = (int)ceil(m_maxArea / m_intv);
 	time_t tstart = clock();
 
+	int threadID = 0;
+	#pragma omp parallel for private(threadID)
 	for (int i = 0; i < m_mesh->nVertex(); i++)
 	{
 		if (i % 1000 == 0)
@@ -427,21 +442,23 @@ void Gyrification::computeGyrification(void)
 			fflush(stdout);
 			//tstart = clock();
 		}
-		gd.perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea);
+		gd[threadID]->perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea);
 
 		for (int t = 0; t < n; t++)
 		{
 			double delta = m_intv * (t + 1);
 			if (delta > m_maxArea) delta = m_maxArea;
 
-			m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist, state, area, delta));
+			m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist[threadID], state[threadID], area[threadID], delta));
 		}
 	}
 	cout << endl;
 
-	
 	delete [] end_gyral_point;
 	delete [] end_sulcal_point;
+	for (int i = 0; i < m_nThreads; i++)
+		delete gd[i];
+	delete [] gd;
 }
 
 void Gyrification::smoothingScalar(double *scalar, int n)

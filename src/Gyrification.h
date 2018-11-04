@@ -38,6 +38,7 @@ private:
 	point *m_vertex;
 	vector<double> m_areamap1, m_areamap2;
 	bool *m_check_work;		// work space for outer surface flag
+	int m_nThreads;
 
 	Mesh *m_mesh;
 	Mesh *m_outer;
@@ -72,6 +73,7 @@ public:
 	void loadGcurve(const char *filename);
 	void loadGcurveBary(const char *filename);
 	void setPopulationArea(double populationArea);
+	void setThreads(int nThreads);
 private:
 	void initVertex(void);
 	void setupSDist(double distance);	// compute a geodesic distnace map for sulcus

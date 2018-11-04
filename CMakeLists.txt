@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Gyrification)
 
+set (CMAKE_CXX_STANDARD 11)
+
 set(Gyrification_VERSION_MAJOR 1)
 set(Gyrification_VERSION_MINOR 0)
 set(Gyrification_VERSION_PATCH 0)

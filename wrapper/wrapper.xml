@@ -102,6 +102,12 @@
 				<description>Expected population area (0: ignore kernel size adjustment, 166000: adult average used in Lyu et al. 2018)</description>
 				<default>0</default>
 			</double>
+      <integer>
+        <longflag>nThreads</longflag>
+        <name>nThreads</name>
+        <description>OpenMP Threads</description>
+        <default>0</default>
+      </integer>
 		</parameters>
 	<acknowledgements></acknowledgements>
 </executable>
