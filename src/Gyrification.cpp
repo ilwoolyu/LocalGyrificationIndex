@@ -430,17 +430,23 @@ void Gyrification::computeGyrification(void)
 	int n = (int)ceil(m_maxArea / m_intv);
 	time_t tstart = clock();
 
+	int done = 0;
 	int threadID = 0;
+	double elapse = 0;
 	#pragma omp parallel for private(threadID)
 	for (int i = 0; i < m_mesh->nVertex(); i++)
 	{
-		if (i % 1000 == 0)
+		#pragma omp critical
 		{
-			double elapse = (double)(clock() - tstart) / CLOCKS_PER_SEC;
-			cout << "Vertex " << i << ": ";
-			cout << elapse << " sec elapsed\n";
-			fflush(stdout);
-			//tstart = clock();
+			if (done % 1000 == 0)
+			{
+				elapse = (double)(clock() - tstart) / CLOCKS_PER_SEC;
+				cout << "\rVertex " << done << ": ";
+				cout << elapse << " sec elapsed";
+				fflush(stdout);
+				//tstart = clock();
+			}
+			done++;
 		}
 		gd[threadID]->perform_front_propagation(&i, 1, NULL, 0, 1e9, 0, m_maxArea);
 
@@ -452,7 +458,10 @@ void Gyrification::computeGyrification(void)
 			m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist[threadID], state[threadID], area[threadID], delta));
 		}
 	}
-	cout << endl;
+	elapse = (double)(clock() - tstart) / CLOCKS_PER_SEC;
+	cout << "\rVertex " << m_mesh->nVertex() << ": ";
+	cout << elapse << " sec elapsed\n";
+	fflush(stdout);
 
 	delete [] end_gyral_point;
 	delete [] end_sulcal_point;
