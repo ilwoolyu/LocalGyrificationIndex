@@ -392,6 +392,7 @@ void Gyrification::computeGyrification(void)
 	const double **dist = new const double*[m_nThreads];
 	const int **state = new const int*[m_nThreads];
 	const double **area = new const double*[m_nThreads];
+	#pragma omp parallel for
 	for (int i = 0; i < m_nThreads; i++)
 	{
 		gd[i] = new GeodesicA(m_mesh);
@@ -447,18 +448,16 @@ void Gyrification::computeGyrification(void)
 
 			m_vertex[i].GI.push_back(kernelArea(&m_vertex[i], dist[threadID], state[threadID], area[threadID], delta));
 		}
-                #pragma omp critical
-                {
-                        if (done % 1000 == 0)
-                        {
-                                elapse = omp_get_wtime() - tstart;
-                                cout << "\rVertex " << done << ": ";
-                                cout << elapse << " sec elapsed";
-                                fflush(stdout);
-                                //tstart = clock();
-                        }
-                        done++;
-                }
+		#pragma omp atomic
+		done++;
+		if (done % 1000 == 0)
+		{
+			elapse = omp_get_wtime() - tstart;
+			cout << "\rVertex " << done << ": ";
+			cout << elapse << " sec elapsed";
+			fflush(stdout);
+			//tstart = clock();
+		}
 	}
 	elapse = omp_get_wtime() - tstart;
 	cout << "\rVertex " << m_mesh->nVertex() << ": ";
