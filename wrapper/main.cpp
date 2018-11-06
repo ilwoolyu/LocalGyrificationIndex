@@ -23,8 +23,11 @@ int main(int argc, char *argv[])
 	gi.setMaxKernelSize(maxArea);
 	gi.setSpeed(speed);
 #ifdef _USE_OPENMP
-	const char *env = getenv("OMP_NUM_THREADS");
-	nThreads = (env != NULL) ? std::max(atoi(env), 1) : 1;
+	if (nThreads == 0)
+	{
+		const char *env = getenv("OMP_NUM_THREADS");
+		nThreads = (env != NULL) ? std::max(atoi(env), 1) : 1;
+	}
 	omp_set_num_threads(nThreads);
 	gi.setThreads(nThreads);
 #endif
