@@ -23,8 +23,21 @@ check_params_return:
 if("$runtime_path" == "") then
   set runtime_path = '.'
 endif
-if(! $runtime_path/CurveExtraction) then
+# check files
+if(! -e "$runtime_path/make_outer_hull") then
+  echo "ERROR: make_outer_hull not found!"
+  exit 1;
+endif
+if(! -e "$runtime_path/klaplace") then
+  echo "ERROR: klaplace not found!"
+  exit 1;
+endif
+if(! -e "$runtime_path/CurveExtraction") then
   echo "ERROR: CurveExtraction not found!"
+  exit 1;
+endif
+if(! -e "$runtime_path/Gyrification") then
+  echo "ERROR: Gyrification not found!"
   exit 1;
 endif
 
