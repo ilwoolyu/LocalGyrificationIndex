@@ -1,6 +1,6 @@
 #!/bin/tcsh -f
 
-set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.1 $'
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.2 $'
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
@@ -8,10 +8,11 @@ set anisotropy = 0.2
 set kernel = 316
 set runtime_path = $0:h
 set refarea = 0
+set work_path = $PWD
 #set echo=1
 set start=`date`
 if ($#argv == 0) then
-	goto usage_exit;
+  goto usage_exit;
 endif
 goto parse_args;
 parse_args_return:
@@ -19,17 +20,16 @@ parse_args_return:
 goto check_params;
 check_params_return:
 
-# begin...
-#---------
-
-# temporary work files go here...
-set work_path = $PWD
-if("$work_path" == "/") then
-  set work_path = $input:h
-endif
 if("$runtime_path" == "") then
   set runtime_path = '.'
 endif
+if(! $runtime_path/CurveExtraction) then
+  echo "ERROR: CurveExtraction not found!"
+  exit 1;
+endif
+
+# begin...
+#---------
 set tmpdir = ($work_path/tmp-lgi-${input:t:r:t})
 set cmd=(rm -Rf $tmpdir)
 echo "================="
@@ -165,7 +165,9 @@ while( $#argv != 0 )
       set refarea = $argv[1]; shift;
       echo "Using reference area of ${refarea} mm^2 to adjust kernel size."
       breaksw
-
+   case "--out":
+      set work_path = $argv[1]; shift;
+      breaksw
    case "-h":
    case "--help":
       set PrintHelp = 1;
@@ -241,6 +243,10 @@ check_params:
     echo "ERROR: input white file '${white}' does not exist."
     exit 1;
   endif
+  # temporary work files go here...
+  if("$work_path" == "/") then
+    set work_path = $input:h
+  endif
 goto check_params_return;
 ############--------------##################
 
@@ -249,15 +255,17 @@ goto check_params_return;
 ############--------------##################
 usage_exit:
   echo ""
-  echo "USAGE: $0 [options] --i <input surface>"
+  echo "USAGE: $0 [options] -i <input surface>"
   echo ""
   echo "Produces local gyrification index measures from the cortical surface."
   echo "Output file is named <input surface>.lgi.map.<kernel_size>.txt"
   echo ""
   echo "Required Arguments"
-  echo "  --i       : input surface vtk file."
+  echo "  -i, --i, --input          : input surface vtk file."
   echo ""
   echo "Optional Arguments"
+  echo "  --out <directory>         : sets the output directory"
+  echo "                              (default: ${work_path})"
   echo "  --anisotropy <0-1>        : sets the amount of anisotropy"
   echo "                              (default: ${anisotropy})"
   echo "  --kernel <kernel_size>    : determines kernel size that covers local regions"

@@ -1,24 +1,35 @@
 % Ilwoo Lyu, ilwoolyu@gmail.com
 % Release: OCt 25, 2018
-% Update: OCt 25, 2018
+% Update: Nov 7, 2018
 
 function OuterHull(vtk_input, vtk_output)
-    % ensure types
+    %% check args
+    if nargin ~= 2
+        fprintf('Usage: OuterHull(vtk_input_surface, vtk_output_hull)\n');
+        return;
+    end
+    
+    %% ensure types
     assert(isa(vtk_input, 'char'))
     assert(isa(vtk_output, 'char'))
     
-    % read vtk and set volume size
+    %% read vtk and set volume size
+    fprintf('read vtk: %s\n', vtk_input);
     [v,f] = read_vtk(vtk_input);
     vox = max(v)-min(v);
     vox = ceil(vox / max(vox) * 256);
     
-    % voxelize mesh using Aitkenhead's tool 
+    %% voxelize mesh using Aitkenhead's tool 
+    fprintf('voxelization.. ');
     fv = struct('vertices', v, 'faces', f+1);
     [volume,x,y,z] = VOXELISE(vox(1), vox(2), vox(3), fv, 'xyz');
     volume = padarray(volume, [20, 20, 20]);
     volume = imfill(volume, 26, 'holes');
+    fprintf('done\n');
 
+    %% morphological closing
     % convert to double type
+    fprintf('morphological closing.. ');
     volume = double(volume);
     volume(volume == 1) = 255;
 
@@ -35,8 +46,11 @@ function OuterHull(vtk_input, vtk_output)
 
     % conversion to binary volume
     volume = double(volume > 25) * 255;
+    fprintf('done\n');
 
+    %% outer hull
     % Iso-surface generation
+    fprintf('outer hull creation.. ');
     [f1, v1] = isosurface(volume, 1);
     
     % Surface adjustment
@@ -57,9 +71,16 @@ function OuterHull(vtk_input, vtk_output)
     valid = sum(ismember(f1, tab1),2);
     f3(valid < 3, :) = [];
     f3 = tab2(f3);
+    fprintf('done\n');
     
+    fprintf('repositioning.. ');
+    [~, v4] = pcregrigid(pointCloud(v3), pointCloud(v));
+    v4 = v4.Location;
+    fprintf('done\n');
+
     % write output
-    write_vtk(vtk_output, v3, f3 - 1);
+    fprintf('write vtk: %s\n', vtk_output);
+    write_vtk(vtk_output, v4, f3 - 1);
 end
 
 function A = adjacency(f)

@@ -6,6 +6,10 @@
 #
 exe_name=$0
 exe_dir=`dirname "$0"`
+if [ ! -f "${exe_dir}/OuterHull" ]; then
+  echo "OuterHull does not exist."
+  exit
+fi
 echo "------------------------------------------"
 if [ "$#" -ne 2 ]; then
   echo Usage:
