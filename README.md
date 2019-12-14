@@ -35,8 +35,10 @@ If you have a known reference population area, the kernel size will be automatic
 ```
 $ script/lgi --ref <area mm^2>
 ```
-For example, if kernel size=300 mm^2, reference area=150000 mm^2, input surface area=100000 mm^2, the kernel size is adjusted to 200 mm^2. In our work [[1](#ref1),[2](#ref2)], we used reference area of 166000 mm^2 with kernel size of 316 mm^2. To disable the kernel size adjustment, set --ref 0 or ignore this argument (default: 0).
->**Note**: Please use --ref **166000** with --kernel **316** for consistent quantification independent of individual surfce areas unless you know a specific kernel size for each individual or plan to use an absolute kernel size.
+For example, if kernel size=300 mm^2, reference area=150000 mm^2, input surface area=100000 mm^2, the kernel size is adjusted to 200 mm^2. In our work [[1](#ref1),[2](#ref2)], we used reference area of 166000 mm^2 (pial surface) and 77100 mm^2 (cerebral hull) with kernel size of 316 mm^2. To disable the kernel size adjustment, set --ref 0 or ignore this argument (default: 0).
+>**Note 1**: Please use ~~--ref **166000** (pial surface area)~~ --ref **77100** (cerebral hull area) with --kernel **316** for consistent quantification independent of individual surfce areas unless you know a specific kernel size for each individual or plan to use an absolute kernel size.
+
+>**Note 2**: The reference area refers to cerebral hull rather than pial surface.
 
 In Docker, you need a sudo acces. To run local gyrification, type:
 ```
@@ -76,7 +78,7 @@ $ klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 ```
 > **Note 1**: It would be useful if do some smoothing on "outer_hull_corr.vtk" since it's very rough mesh since isosurface does not provide smooth mesh.
 
-> **Note 2**: Since the outputs of klaplace consume a huge disk space, it is recommended to delete all but "outer_hull_corr.vtk".
+> **Note 2**: ~~Since the outputs of klaplace consume a huge disk space, it is recommended to delete all but "outer_hull_corr.vtk".~~ This issue has been fixed.
 ### Local gyrification index
 The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt":
 ```
@@ -96,7 +98,7 @@ To enable multi-thread support (OpenMP):
 $ HSD --nThreads <# of threads>
 ```
 More technical details (theory, parameter choice, etc.) can be found in [[1](#ref1),[2](#ref2)].
-> **Note 1**: If a population area is known, --poulationArea [area] will adjust the area size of "-m" with respect to the input surface area. The use of --poulationArea is *recommended* particularly for neurodevelopmental studies.
+> **Note 1**: If a population area is known, --refHullArea [area] will adjust the area size of "-m" with respect to the input surface area. The use of --refHullArea is *recommended* particularly for neurodevelopmental studies.
 
 > **Note 2**: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
 

@@ -11,14 +11,15 @@ int main(int argc, char *argv[])
 		std::cout << "Usage: " << argv[0] << " " << "--help" << std::endl;
 		return EXIT_FAILURE;
 	}
-	
+
 	Gyrification gi;
-	
+
 	const char *cfile = NULL;
 	if (!corr.empty()) cfile = corr.c_str();
 
 	gi.open(input.c_str(), scurve.c_str(), gcurve.c_str(), outer.c_str(), cfile);
-	gi.setPopulationArea(populationArea);
+	gi.setRefCortexArea(refCortexArea);
+	gi.setRefHullArea(refHullArea);
 	gi.setKernelInterval(intvArea);
 	gi.setMaxKernelSize(maxArea);
 	gi.setSpeed(speed);
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
 	omp_set_num_threads(nThreads);
 	gi.setThreads(nThreads);
 #endif
-	
+
 	if (map.empty()) gi.run(rad);
 	else gi.run(map.c_str());
 

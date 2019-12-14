@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
-	<title>Gyrification Index</title>
-	<version>1.1</version>
+	<title>Local Gyrification Index</title>
+	<version>1.2</version>
 	<contributor>Ilwoo Lyu</contributor>
-	<description>Cortical Shape-Adaptive Local Gyrification Index. Please refer to the following papers for details: Lyu et al., A Cortical Shape-Adaptive Approach to Local Gyrification Index, Medical Image Analysis, 48, 244-258, 2018, Lyu et al., Novel Local Shape-Adaptive Gyrification Index with Application to Brain Development, LNCS10433, 31-39, MICCAI 2017</description>
+	<description>Cortical Shape-Adaptive Local Gyrification Index. Please refer to the following papers for details:&#xA;[1] Lyu et al., A Cortical Shape-Adaptive Approach to Local Gyrification Index, Medical Image Analysis, 48, 244-258, 2018.&#xA;[2] Lyu et al. Novel Local Shape-Adaptive Gyrification Index with Application to Brain Development, LNCS10433, 31-39, MICCAI 2017</description>
 		<parameters>
 			<string>
 				<longflag>input</longflag>
@@ -97,17 +97,23 @@
 				<default>0.2</default>
 			</double>
 			<double>
-				<longflag>populationArea</longflag>
-				<name>populationArea</name>
-				<description>Expected population area (0: ignore kernel size adjustment, 166000: adult average used in Lyu et al. 2018)</description>
+				<longflag>refCortexArea</longflag>
+				<name>refCortexArea</name>
+				<description>Expected reference cortex area</description>
 				<default>0</default>
 			</double>
-      <integer>
-        <longflag>nThreads</longflag>
-        <name>nThreads</name>
-        <description>OpenMP Threads</description>
-        <default>0</default>
-      </integer>
+			<double>
+				<longflag>refHullArea</longflag>
+				<name>refHullArea</name>
+				<description>Expected reference cerebral hull area</description>
+				<default>0</default>
+			</double>
+			<integer>
+				<longflag>nThreads</longflag>
+				<name>nThreads</name>
+				<description>OpenMP Threads</description>
+				<default>0</default>
+			</integer>
 		</parameters>
 	<acknowledgements></acknowledgements>
 </executable>

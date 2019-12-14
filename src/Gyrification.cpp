@@ -2,7 +2,7 @@
 *	Gyrification.cpp
 *
 *	Release: February 2016
-*	Update: September 2016
+*	Update: December 2019
 *
 *	University of North Carolina at Chapel Hill
 *	Department of Computer Science
@@ -29,7 +29,9 @@ Gyrification::Gyrification(void)
 	m_mesh = NULL;
 	m_outer = NULL;
 	m_vertex = NULL;
-	m_populationArea = 0;
+	m_refCortexArea = 0;
+	m_refHullArea = 0;
+	m_adjRatio = 1;
 }
 
 Gyrification::~Gyrification(void)
@@ -61,8 +63,9 @@ void Gyrification::run(double rad)
 	cout << elapse << " sec elapsed" << endl;
 
 	cout << "- Area Adjustment" << endl;
-	if (m_populationArea == 0) m_populationArea = totalArea();
-	m_adjRatio = totalArea() / m_populationArea;
+	m_adjRatio = 1;
+	if (m_refHullArea > 0) m_adjRatio = totalHArea() / m_refHullArea;
+	else if (m_refCortexArea > 0) m_adjRatio = totalArea() / m_refCortexArea;
 	m_maxArea *= m_adjRatio;
 	m_intv *= m_adjRatio;
 	cout << "  Adjusted ratio: " << m_adjRatio << endl;
@@ -93,8 +96,9 @@ void Gyrification::run(const char *map)
 	cout << elapse << " sec elapsed" << endl;
 
 	cout << "- Area Adjustment" << endl;
-	if (m_populationArea == 0) m_populationArea = totalArea();
-	m_adjRatio = totalArea() / m_populationArea;
+	m_adjRatio = 1;
+	if (m_refHullArea > 0) m_adjRatio = totalHArea() / m_refHullArea;
+	else if (m_refCortexArea > 0) m_adjRatio = totalArea() / m_refCortexArea;
 	m_maxArea *= m_adjRatio;
 	m_intv *= m_adjRatio;
 	cout << "  Adjusted ratio: " << m_adjRatio << endl;
@@ -968,7 +972,22 @@ double Gyrification::totalArea(void)
 	return area;
 }
 
-void Gyrification::setPopulationArea(double populationArea)
+double Gyrification::totalHArea(void)
 {
-	m_populationArea = populationArea;
+	double area = 0;
+	for (int i = 0; i < m_mesh->nVertex(); i++)
+	{
+		area += m_areamap2[i];
+	}
+	return area;
+}
+
+void Gyrification::setRefCortexArea(double refCortexArea)
+{
+	m_refCortexArea = refCortexArea;
+}
+
+void Gyrification::setRefHullArea(double refHullArea)
+{
+	m_refHullArea = refHullArea;
 }

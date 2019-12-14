@@ -2,7 +2,7 @@
 *	Gyrification.h
 *
 *	Release: February 2016
-*	Update: April 2016
+*	Update: December 2019
 *
 *	University of North Carolina at Chapel Hill
 *	Department of Computer Science
@@ -48,7 +48,7 @@ private:
 	double *m_pu;
 	double *m_lam1, *m_lam2;
 	double m_intv, m_maxArea, m_speed;
-	double m_populationArea;
+	double m_refCortexArea, m_refHullArea;
 	double m_adjRatio;
 	
 public:
@@ -72,7 +72,8 @@ public:
 	void loadScurveBary(const char *filename);
 	void loadGcurve(const char *filename);
 	void loadGcurveBary(const char *filename);
-	void setPopulationArea(double populationArea);
+	void setRefCortexArea(double refCortexArea);
+	void setRefHullArea(double refHullArea);
 	void setThreads(int nThreads);
 private:
 	void initVertex(void);
@@ -89,5 +90,6 @@ private:
 	double kernelArea(point *p, const double *dist, const int *state, const double *area = NULL, const double size = 0);			// kernel area
 	double vertexArea(const Mesh *mesh, int id);	// vertex area
 	double totalArea(void);
+	double totalHArea(void);
 };
 

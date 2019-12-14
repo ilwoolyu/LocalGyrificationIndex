@@ -1,13 +1,13 @@
 #!/bin/tcsh -f
 
-set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.2 $'
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3 $'
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
 set anisotropy = 0.2
 set kernel = 316
 set runtime_path = $0:h
-set refarea = 0
+set refarea = 77100
 set work_path = $PWD
 #set echo=1
 set start=`date`
@@ -125,7 +125,7 @@ endif
 # Gyrification
 #
 # compute a local gyrification index map
-set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy --populationArea $refarea)
+set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy --refHullArea $refarea)
 echo "================="
 echo "$cmd"
 echo "================="

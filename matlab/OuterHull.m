@@ -37,11 +37,11 @@ function OuterHull(vtk_input, vtk_output)
     volume = imgaussfilt3(volume,2);
 
     % Closing operation
-    se = offsetstrel('ball', 15, 15);
+    se = strel('ball', 15, 15);
     volume = imclose(volume, se);
 
     % Dilation operation
-    se = offsetstrel('ball', 1, 1);
+    se = strel('ball', 1, 1);
     volume = imdilate(volume, se);
 
     % conversion to binary volume
