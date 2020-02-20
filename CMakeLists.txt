@@ -5,8 +5,8 @@ project(Gyrification)
 set (CMAKE_CXX_STANDARD 11)
 
 set(Gyrification_VERSION_MAJOR 1)
-set(Gyrification_VERSION_MINOR 0)
-set(Gyrification_VERSION_PATCH 0)
+set(Gyrification_VERSION_MINOR 2)
+set(Gyrification_VERSION_PATCH 1)
 set(Gyrification_VERSION
 ${Gyrification_VERSION_MAJOR}.${Gyrification_VERSION_MINOR}.${Gyrification_VERSION_PATCH})
 
@@ -19,7 +19,6 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-find_package(SlicerExecutionModel REQUIRED)
 find_package(MeshLib REQUIRED)
 find_package(OpenMP)
 

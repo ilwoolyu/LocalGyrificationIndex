@@ -103,8 +103,9 @@ More technical details (theory, parameter choice, etc.) can be found in [[1](#re
 > **Note 2**: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
 
 ## Dependency
-* [MeshLib (general mesh processing)](https://github.com/ilwoolyu/MeshLib)
-* [SlicerExecutionModel (CLI)](https://github.com/Slicer/SlicerExecutionModel)
+* [MeshLib (general mesh processing)](https://github.com/ilwoolyu/MeshLib)<br />
+* ~~<a href="https://github.com/Slicer/SlicerExecutionModel">SlicerExecutionModel (CLI)</a>~~<br />
+*To reduce package dependencies, CLI is now supported by <a href="https://github.com/CLIUtils/CLI11">CLI11</a>. This tool no longer uses SlicerExecutionModel. CLI11 will be automatically installed via CMake.*
 
 ## Required Components
 * [CurveExtraction (sulcal/gyral curves)](https://github.com/ilwoolyu/CurveExtraction)

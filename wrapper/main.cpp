@@ -1,10 +1,10 @@
 #include <omp.h>
 #include "Gyrification.h"
-#include "wrapperCLP.h"
+#include "PARSE_ARGS.h"
 
-int main(int argc, char *argv[])
+int main(int argc, char** argv)
 {
-	PARSE_ARGS;
+	PARSE_ARGS(argc, argv);
 
 	if (argc < 2 || (output.empty() && gmap.empty()) || input.empty())
 	{
