@@ -49,7 +49,7 @@ $ docker run \
 ```
 ## Implementation Details
 ### Sulcal/gyral curve extraction
-The following command line will generate "output.scurve", "output.gcurve", and ".bary":
+The following command line will generate `output.scurve`, `output.gcurve`, and `.bary`:
 ```
 $ CurveExtraction -i input.vtk -o output --sulcus --gyrus --bary --noVtk
 ```
@@ -66,21 +66,23 @@ To create a binary volume image of the input surface using <a href="https://www.
 ```
 $ matlab OuterHull('input.vtk', 'outer_hull.vtk');
 ```
+To use `script/lgi`, the source codes in `matlab` need to be compiled. In MATLAB (2015b or above), run `script/compile.m` to generate an executable file. [MATLAB Runtime](https://www.mathworks.com/products/compiler/matlab-runtime.html) should be installed.
+
 ### Outer hull correspondence
 To find a Laplacian shape correspondence, the following command will give Laplacian trajectories using [klaplace (outer hull correspondence)](https://github.com/ilwoolyu/klaplace):
 ```
 $ klaplace -dims 128 input.vtk outer_hull.vtk -surfaceCorrespondence outer_hull
 ```
-The trjectories will be generated in "outer_hull_warpedMesh.vtp".
+The trjectories will be generated in `outer_hull_warpedMesh.vtp`.
 Let's trace the final destinations of the trajectories to obtain the outer hull:
 ```
 $ klaplace -conv outer_hull_warpedMesh.vtp outer_hull_corr.vtk
 ```
-> **Note 1**: It would be useful if do some smoothing on "outer_hull_corr.vtk" since it's very rough mesh since isosurface does not provide smooth mesh.
+> **Note 1**: It would be useful if do some smoothing on `outer_hull_corr.vtk` since it's very rough mesh since isosurface does not provide smooth mesh.
 
 > **Note 2**: ~~Since the outputs of klaplace consume a huge disk space, it is recommended to delete all but "outer_hull_corr.vtk".~~ This issue has been fixed.
 ### Local gyrification index
-The following command line gives local gyrification index per vertex in "output.lgi.map.316.txt":
+The following command line gives local gyrification index per vertex in `output.lgi.map.316.txt`:
 ```
 $ Gyrification \
                -i input.vtk \
@@ -95,10 +97,10 @@ Barycentric curves can provide dense points along sulcal/gyral regions.
 
 To enable multi-thread support (OpenMP):
 ```
-$ HSD --nThreads <# of threads>
+$ Gyrification --nThreads <# of threads>
 ```
 More technical details (theory, parameter choice, etc.) can be found in [[1](#ref1),[2](#ref2)].
-> **Note 1**: If a population area is known, --refHullArea [area] will adjust the area size of "-m" with respect to the input surface area. The use of --refHullArea is *recommended* particularly for neurodevelopmental studies.
+> **Note 1**: If a population area is known, --refHullArea [area] will adjust the area size of `-m` with respect to the input surface area. The use of --refHullArea is *recommended* particularly for neurodevelopmental studies.
 
 > **Note 2**: -t [area] will create different lgi measurements in a given interval of area; e.g., -t 100 -m 300 will give lgi at area of 100, 200, and 300 mm^2.
 
