@@ -1,6 +1,6 @@
 #!/bin/tcsh -f
 
-set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3 $'
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3.1 $'
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
@@ -24,8 +24,8 @@ if("$runtime_path" == "") then
   set runtime_path = '.'
 endif
 # check files
-if(! -e "$runtime_path/make_outer_hull") then
-  echo "ERROR: make_outer_hull not found!"
+if(! -e "$runtime_path/OuterHull") then
+  echo "ERROR: OuterHull not found!"
   exit 1;
 endif
 if(! -e "$runtime_path/klaplace") then
@@ -59,7 +59,7 @@ if ($RunIt) $cmd
 # make_outer_hull
 #
 # create a cerebral hull that tightly envelop the surface
-set cmd=($runtime_path/make_outer_hull ${input} ${tmpdir}/${input:r:t}.hull.vtk)
+set cmd=($runtime_path/OuterHull ${input} ${tmpdir}/${input:r:t}.hull.vtk)
 echo "================="
 echo "$cmd"
 echo "================="
@@ -76,7 +76,7 @@ endif
 set outer = ${tmpdir}/${input:r:t}.hull.corr.vtk
 set cmd1=($runtime_path/klaplace -dims 128 ${input} ${tmpdir}/${input:r:t}.hull.vtk -surfaceCorrespondence ${tmpdir}/${input:r:t}.corr)
 set cmd2=($runtime_path/klaplace -conv ${tmpdir}/${input:r:t}.corr_warpedMesh.vtp $outer)
-set cmd3=(rm -Rf "$tmpdir/*.vtp" "$tmpdir/*.vts")
+set cmd3=(rm -Rf "$tmpdir/*.vtp")
 echo "================="
 echo "$cmd1"
 echo "$cmd2"
