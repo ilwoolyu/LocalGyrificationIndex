@@ -6,7 +6,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 set(Gyrification_VERSION_MAJOR 1)
 set(Gyrification_VERSION_MINOR 2)
-set(Gyrification_VERSION_PATCH 1)
+set(Gyrification_VERSION_PATCH 2)
 set(Gyrification_VERSION
 ${Gyrification_VERSION_MAJOR}.${Gyrification_VERSION_MINOR}.${Gyrification_VERSION_PATCH})
 

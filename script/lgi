@@ -1,6 +1,6 @@
 #!/bin/tcsh -f
 
-set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3.1 $'
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3.2 $'
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
@@ -9,6 +9,12 @@ set kernel = 316
 set runtime_path = $0:h
 set refarea = 77100
 set work_path = $PWD
+if( $?OMP_NUM_THREADS ) then
+  set thread = $OMP_NUM_THREADS
+else
+  set thread = 1
+endif
+
 #set echo=1
 set start=`date`
 if ($#argv == 0) then
@@ -102,8 +108,8 @@ endif
 # extracts sulcal and gyral curves from pial and white surfaces
 set scurve = ${tmpdir}/${input:r:t}.scurve
 set gcurve = ${tmpdir}/${white:r:t}.gcurve
-set cmd1=($runtime_path/CurveExtraction -i ${input} -o ${tmpdir}/${input:r:t} --sulcus --noVtk --bary)
-set cmd2=($runtime_path/CurveExtraction -i ${white} -o ${tmpdir}/${white:r:t} --gyrus --noVtk --bary)
+set cmd1=($runtime_path/CurveExtraction -i ${input} -o ${tmpdir}/${input:r:t} --sulcus --noVtk --bary --nThreads $thread)
+set cmd2=($runtime_path/CurveExtraction -i ${white} -o ${tmpdir}/${white:r:t} --gyrus --noVtk --bary --nThreads $thread)
 echo "================="
 echo "$cmd1"
 echo "$cmd2"
@@ -125,7 +131,7 @@ endif
 # Gyrification
 #
 # compute a local gyrification index map
-set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy --refHullArea $refarea)
+set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy --refHullArea $refarea --nThreads $thread)
 echo "================="
 echo "$cmd"
 echo "================="
@@ -191,6 +197,11 @@ while( $#argv != 0 )
    case "--version":
       echo $VERSION
       exit 0;
+      breaksw
+
+   case "--thread":
+      set thread = $argv[1]; shift;
+      echo "Using ${thread} OpenMP thread(s)."
       breaksw
 
    case "-i":
@@ -286,8 +297,9 @@ usage_exit:
   echo "  --white <white_vtk_file>  : provides white matter surface for better gyral "
   echo "                              curve extraction"
   echo "  --ref <reference_area>    : set the reference area for kernel size adjustment "
-  echo "                              166000 used in Lyu et al. 2018"
   echo "                              (default: ${refarea})"
+  echo "  --thread <number>         : set the number of OpenMP threads "
+  echo "                              (default: ${thread})"
   echo "  --help    : short descriptive help"
   echo "  --version : script version info"
   echo "  --echo    : enable command echo, for debug"

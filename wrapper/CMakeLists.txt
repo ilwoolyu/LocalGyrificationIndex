@@ -15,5 +15,6 @@ add_executable(
 if (OPENMP_FOUND)
 	target_compile_definitions(Gyrification PRIVATE _USE_OPENMP)
 endif()
+target_compile_definitions(Gyrification PRIVATE LGI_VERSION=\"v${Gyrification_VERSION}\")
 
 target_link_libraries(Gyrification Mesh)
