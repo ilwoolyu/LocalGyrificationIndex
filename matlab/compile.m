@@ -1,7 +1,10 @@
 % This is for MATLAB Compiler Runtime (MCR).
-% MCR packages are required: MCR_R2015b_glnxa64_installer.zip
 mkdir exec
-mcc -m OuterHull.m -d exec -a VOXELISE
+if verLessThan('matlab', '8.5')
+    mcc -m OuterHull.m -d exec -a VOXELISE -a ICP_finite -R -nodisplay -R -nojvm
+else
+    mcc -m OuterHull.m -d exec -a VOXELISE -R -nodisplay -R -nojvm
+end
 movefile exec/OuterHull ../script
 delete exec/*
 rmdir exec

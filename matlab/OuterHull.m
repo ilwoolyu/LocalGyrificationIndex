@@ -34,7 +34,11 @@ function OuterHull(vtk_input, vtk_output)
     volume(volume == 1) = 255;
 
     % Guassian smoothing to sufficiently envelop the mesh
-    volume = imgaussfilt3(volume,2);
+    if verLessThan('matlab', '8.4')
+        volume = gauss3filter(volume,2);
+    else
+        volume = imgaussfilt3(volume,2);
+    end
 
     % Closing operation
     se = strel('ball', 15, 15);
@@ -62,7 +66,10 @@ function OuterHull(vtk_input, vtk_output)
     
     % largest connected component
     A = adjacency(f1);
-    bins = conncomp(graph(A));
+    [p,~,r] = dmperm(A'+speye(size(A)));
+    bins = cumsum(full(sparse(1,r(1:end-1),1,1,size(A,1))));
+    bins(p) = bins;
+
     tab1 = find(bins == 1);
     tab2 = zeros(max(f1(:)),1);
     tab2(tab1) = 1: length(tab1);
@@ -72,10 +79,15 @@ function OuterHull(vtk_input, vtk_output)
     f3(valid < 3, :) = [];
     f3 = tab2(f3);
     fprintf('done\n');
-    
+
     fprintf('repositioning.. ');
-    [~, v4] = pcregrigid(pointCloud(v3), pointCloud(v));
-    v4 = v4.Location;
+    if verLessThan('matlab', '8.5')
+        Options.Verbose = false;
+        v4 = ICP_finite(v,v3,Options);
+    else
+        [~, v4] = pcregrigid(pointCloud(v3), pointCloud(v));
+        v4 = v4.Location;
+    end
     fprintf('done\n');
 
     % write output
