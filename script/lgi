@@ -1,6 +1,6 @@
 #!/bin/tcsh -f
 
-set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3.2 $'
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3.3 $'
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
@@ -80,7 +80,7 @@ endif
 #
 # establish a Laplacian correspondence between the hull and surface
 set outer = ${tmpdir}/${input:r:t}.hull.corr.vtk
-set cmd1=($runtime_path/klaplace -dims 128 ${input} ${tmpdir}/${input:r:t}.hull.vtk -surfaceCorrespondence ${tmpdir}/${input:r:t}.corr)
+set cmd1=($runtime_path/klaplace -thread $thread -dims 128 ${input} ${tmpdir}/${input:r:t}.hull.vtk -surfaceCorrespondence ${tmpdir}/${input:r:t}.corr)
 set cmd2=($runtime_path/klaplace -conv ${tmpdir}/${input:r:t}.corr_warpedMesh.vtp $outer)
 set cmd3=(rm -Rf "$tmpdir/*.vtp")
 echo "================="
