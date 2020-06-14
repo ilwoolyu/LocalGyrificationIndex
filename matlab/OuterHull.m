@@ -34,11 +34,8 @@ function OuterHull(vtk_input, vtk_output)
     volume(volume == 1) = 255;
 
     % Guassian smoothing to sufficiently envelop the mesh
-    if verLessThan('matlab', '8.4')
-        volume = gauss3filter(volume,2);
-    else
-        volume = imgaussfilt3(volume,2);
-    end
+    sd = 2;
+    volume = smooth3(volume,'gaussian',2*ceil(2*sd)+1,sd);
 
     % Closing operation
     se = strel('ball', 15, 15);

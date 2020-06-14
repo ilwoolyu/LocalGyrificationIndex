@@ -126,38 +126,41 @@ Options.TolX=max(maxP-minP)/1000;
 if(Options.Verbose)
     s=sprintf('    Itteration          Error'); disp(s);
 end
-% Make a uniform grid of points
-% These will be used to sort the points into local groups
-% to speed up the distance measurements.
-spacing=size(Points_Static,1)^(1/6)*sqrt(3);
-spacing_dist=max(maxP(:)-minP(:))/spacing;
-xa=minP(1):spacing_dist:maxP(1);
-xb=minP(2):spacing_dist:maxP(2);
-xc=minP(3):spacing_dist:maxP(3);
-[x,y,z]=ndgrid(xa,xb,xc);
-Points_Group=[x(:) y(:) z(:)];
-% Calculate the radius of a point from the uniform grid.
-radius=spacing_dist*sqrt(3);
-% Sort the points in to groups
-Cell_Group_Static=cell(1,size(Points_Group,1));
-for i=1:size(Points_Group,1)
-    % Calculate distance of an uniform group point to all static points
-    %distance=sum((Points_Static-repmat(Points_Group(i,:),size(Points_Static,1),1)).^2,2);
-    %check=(distance<(mult*radius^2));
-    check=(Points_Static(:,1)>(Points_Group(i,1)-radius))&(Points_Static(:,1)<(Points_Group(i,1)+radius))...
-        &(Points_Static(:,2)>(Points_Group(i,2)-radius))&(Points_Static(:,2)<(Points_Group(i,2)+radius))...
-        &(Points_Static(:,3)>(Points_Group(i,3)-radius))&(Points_Static(:,3)<(Points_Group(i,3)+radius));
-    
-    % Add the closest static points, if none, increase the radius of point
-    % search
-    mult=1;
-    while(isempty(Cell_Group_Static{i}))
-        Cell_Group_Static{i}=Points_Static(check,:);
-        % Increase radius
-        mult=mult+1.5;
-        check=(Points_Static(:,1)>(Points_Group(i,1)-mult*radius))&(Points_Static(:,1)<(Points_Group(i,1)+mult*radius))...
-            &(Points_Static(:,2)>(Points_Group(i,2)-mult*radius))&(Points_Static(:,2)<(Points_Group(i,2)+mult*radius))...
-            &(Points_Static(:,3)>(Points_Group(i,3)-mult*radius))&(Points_Static(:,3)<(Points_Group(i,3)+mult*radius));
+
+if verLessThan('matlab', '7.10')
+    % Make a uniform grid of points
+    % These will be used to sort the points into local groups
+    % to speed up the distance measurements.
+    spacing=size(Points_Static,1)^(1/6)*sqrt(3);
+    spacing_dist=max(maxP(:)-minP(:))/spacing;
+    xa=minP(1):spacing_dist:maxP(1);
+    xb=minP(2):spacing_dist:maxP(2);
+    xc=minP(3):spacing_dist:maxP(3);
+    [x,y,z]=ndgrid(xa,xb,xc);
+    Points_Group=[x(:) y(:) z(:)];
+    % Calculate the radius of a point from the uniform grid.
+    radius=spacing_dist*sqrt(3);
+    % Sort the points in to groups
+    Cell_Group_Static=cell(1,size(Points_Group,1));
+    for i=1:size(Points_Group,1)
+        % Calculate distance of an uniform group point to all static points
+        %distance=sum((Points_Static-repmat(Points_Group(i,:),size(Points_Static,1),1)).^2,2);
+        %check=(distance<(mult*radius^2));
+        check=(Points_Static(:,1)>(Points_Group(i,1)-radius))&(Points_Static(:,1)<(Points_Group(i,1)+radius))...
+            &(Points_Static(:,2)>(Points_Group(i,2)-radius))&(Points_Static(:,2)<(Points_Group(i,2)+radius))...
+            &(Points_Static(:,3)>(Points_Group(i,3)-radius))&(Points_Static(:,3)<(Points_Group(i,3)+radius));
+
+        % Add the closest static points, if none, increase the radius of point
+        % search
+        mult=1;
+        while(isempty(Cell_Group_Static{i}))
+            Cell_Group_Static{i}=Points_Static(check,:);
+            % Increase radius
+            mult=mult+1.5;
+            check=(Points_Static(:,1)>(Points_Group(i,1)-mult*radius))&(Points_Static(:,1)<(Points_Group(i,1)+mult*radius))...
+                &(Points_Static(:,2)>(Points_Group(i,2)-mult*radius))&(Points_Static(:,2)<(Points_Group(i,2)+mult*radius))...
+                &(Points_Static(:,3)>(Points_Group(i,3)-mult*radius))&(Points_Static(:,3)<(Points_Group(i,3)+mult*radius));
+        end
     end
 end
 % closest points for all points
@@ -166,17 +169,22 @@ while(fval_perc<(1-Options.TolP))
     itt=itt+1;
     
     % Calculate closest point for all points
-    for i=1:size(Points_Moved,1)
-        % Find closest group point
-        Point=Points_Moved(i,:);
-        dist=(Points_Group(:,1)-Point(1)).^2+(Points_Group(:,2)-Point(2)).^2+(Points_Group(:,3)-Point(3)).^2;
-        [mindist,j]=min(dist);
-        
-        % Find closest point in group
-        Points_Group_Static=Cell_Group_Static{j};
-        dist=(Points_Group_Static(:,1)-Point(1)).^2+(Points_Group_Static(:,2)-Point(2)).^2+(Points_Group_Static(:,3)-Point(3)).^2;
-        [mindist,j]=min(dist);
-        Points_Match(i,:)=Points_Group_Static(j,:);
+    if verLessThan('matlab', '7.10')
+        for i=1:size(Points_Moved,1)
+            % Find closest group point
+            Point=Points_Moved(i,:);
+            dist=(Points_Group(:,1)-Point(1)).^2+(Points_Group(:,2)-Point(2)).^2+(Points_Group(:,3)-Point(3)).^2;
+            [mindist,j]=min(dist);
+
+            % Find closest point in group
+            Points_Group_Static=Cell_Group_Static{j};
+            dist=(Points_Group_Static(:,1)-Point(1)).^2+(Points_Group_Static(:,2)-Point(2)).^2+(Points_Group_Static(:,3)-Point(3)).^2;
+            [mindist,j]=min(dist);
+            Points_Match(i,:)=Points_Group_Static(j,:);
+        end
+    else
+        idx=knnsearch(Points_Static,Points_Moved);
+        Points_Match=Points_Static(idx,:);
     end
     
     % Calculate the parameters which minimize the distance error between
