@@ -40,11 +40,17 @@ For example, if kernel size=300 mm^2, reference area=150000 mm^2, input surface 
 
 >**Note 2**: The reference area refers to cerebral hull rather than pial surface.
 
+To generate indices per intermediate kernel size
+```
+$ script/lgi --intv <area mm^2>
+```
+This can support a breath analysis of data across different kernel sizes at no extra cost. See also `-t` in `Gyrification`.
+
 In Docker, you need a sudo acces. To run local gyrification, type:
 ```
 $ docker run \
          -v <LOCAL_INPUT_PATH>:/INPUT/ \
-         --rm ilwoolyu/cmorph:1.0 \
+         --rm ilwoolyu/cmorph:1.6 \
          lgi -i /INPUT/input.vtk
 ```
 ## Implementation Details

@@ -1,6 +1,6 @@
 #!/bin/tcsh -f
 
-set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3.3 $'
+set VERSION = '$Id: Ilwoo Lyu, Cortical Shape-Adaptive Local Gyrification Index v1.3.4 $'
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
@@ -9,6 +9,7 @@ set kernel = 316
 set runtime_path = $0:h
 set refarea = 77100
 set work_path = $PWD
+set intv = 0
 if( $?OMP_NUM_THREADS ) then
   set thread = $OMP_NUM_THREADS
 else
@@ -131,7 +132,7 @@ endif
 # Gyrification
 #
 # compute a local gyrification index map
-set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy --refHullArea $refarea --nThreads $thread)
+set cmd=($runtime_path/Gyrification -i ${input} -o ${tmpdir}/${input:r:t} --outer $outer -s $scurve.bary -g $gcurve.bary -m $kernel --speed $anisotropy --refHullArea $refarea --nThreads $thread --intvArea $intv)
 echo "================="
 echo "$cmd"
 echo "================="
@@ -183,6 +184,10 @@ while( $#argv != 0 )
    case "--ref":
       set refarea = $argv[1]; shift;
       echo "Using reference area of ${refarea} mm^2 to adjust kernel size."
+      breaksw
+   case "--intv":
+      set intv = $argv[1]; shift;
+      echo "Using area interval of ${intv} mm^2 to generate results within intermediate kenels."
       breaksw
    case "--out":
       set work_path = $argv[1]; shift;
@@ -296,9 +301,11 @@ usage_exit:
   echo "                              (default: ${kernel})"
   echo "  --white <white_vtk_file>  : provides white matter surface for better gyral "
   echo "                              curve extraction"
-  echo "  --ref <reference_area>    : set the reference area for kernel size adjustment "
+  echo "  --ref <reference_area>    : sets the reference area for kernel size adjustment "
   echo "                              (default: ${refarea})"
-  echo "  --thread <number>         : set the number of OpenMP threads "
+  echo "  --intv <number>           : writes outputs per area interval"
+  echo "                              (default: ${intv})"
+  echo "  --thread <number>         : sets the number of OpenMP threads "
   echo "                              (default: ${thread})"
   echo "  --help    : short descriptive help"
   echo "  --version : script version info"
@@ -327,11 +334,13 @@ References
 [3] Lyu, I., Kim, S., Woodward, N., Styner, M., Landman, B., TRACE: A Topological Graph Representation for Automatic Sulcal Curve Extraction, IEEE Transactions on Medical Imaging, 37(7), 1653-1663, 2018
 [4] Lee, J., Kim, S., Oguz, I., Styner, M., Enhanced Cortical Thickness Measurements for Rodent Brains via Lagrangian-based RK4 Streamline Computation, SPIE Medical Imaging 2016, SPIE9784, 97840B-1-97840B-10, 2016
 
-Example:
+Examples:
 
-  lgi --i lh.pial.vtk
+  lgi -i lh.pial.vtk
+  lgi -i lh.pial.vtk --white lh.white.vtk                            # white matter surface (recommended)
+  lgi -i lh.pial.vtk --white lh.white.vtk --intv 316 --kernel 1264   # all intermediate kernels 316, 632, ..., 1264
 
-produces lh.pial.lgi.map.<kernel size>.txt
+produce lh.pial.lgi.map.<kernel size>.txt
 
 See also https://github.com/ilwoolyu/LocalGyrificationIndex
 
